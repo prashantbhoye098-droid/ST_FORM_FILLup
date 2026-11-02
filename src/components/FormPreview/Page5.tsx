@@ -52,7 +52,7 @@ export const Page5: React.FC<Page5Props> = ({ data }) => {
         <VanshavalTreeDiagram data={data} />
 
         {/* Name Discrepancy Clause (तसेच शाळा सोडल्याच्या दाखल्यावर नाव बदल) */}
-        <div className="text-justify text-xs sm:text-[12px] leading-relaxed mt-2 bg-slate-50/70 p-2 border border-slate-300">
+        <div className="text-justify text-xs sm:text-[11.5px] leading-relaxed mt-2 bg-slate-50/70 p-2 border border-slate-300">
           तसेच {personSubject}/वडिलांच्या/आजोबांच्या शाळा सोडल्याच्या दाखल्यावर{' '}
           <span className="font-bold underline text-slate-950 bg-amber-50 px-1 border-b border-slate-900">
             {data.oldNameOnLC || '____________________'}
@@ -63,7 +63,7 @@ export const Page5: React.FC<Page5Props> = ({ data }) => {
           </span>{' '}
           व{' '}
           <span className="font-bold underline text-slate-950 bg-emerald-50 px-1 border-b border-slate-900">
-            {data.newNameOfficial || data.applicantName || '____________________'}
+            {data.newNameOfficial || '____________________'}
           </span>{' '}
           ही दोन्ही नाव {personSubject}/ वडील / आजोबा ची आहेत ही दुसरी व्यक्ती नसून एकच व्यक्ती आहे. वरील प्रमाणे आमची वंशावळ असून हे माझेच कुटुंब आहे.
         </div>

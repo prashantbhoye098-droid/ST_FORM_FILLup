@@ -14,57 +14,57 @@ export const VanshavalTreeDiagram: React.FC<VanshavalTreeDiagramProps> = ({ data
   const greatGreatGrandfatherName = v.greatGreatGrandfather || 'खापर पणजोबा';
 
   return (
-    <div className="w-full my-3 px-2 py-2 border border-slate-700 bg-white text-xs">
-      <div className="text-center font-bold text-sm mb-3 tracking-wide underline">
+    <div className="w-full my-1.5 px-2 py-1.5 border border-slate-700 bg-white text-xs">
+      <div className="text-center font-bold text-xs mb-1.5 tracking-wide underline">
         कुटुंबाची वंशावळ (Family Tree)
       </div>
 
       <div className="flex flex-col items-center w-full">
         {/* Level 1: खापर पणजोबा */}
         <div className="flex flex-col items-center">
-          <div className="border border-slate-900 bg-slate-50 px-3 py-1 font-semibold text-center min-w-[170px] shadow-2xs">
-            <div className="text-[10px] text-slate-700 font-normal">खापर पणजोबा</div>
-            <div className="text-xs font-bold text-slate-950">{greatGreatGrandfatherName}</div>
+          <div className="border border-slate-900 bg-slate-50 px-2.5 py-0.5 font-semibold text-center min-w-[150px] shadow-2xs">
+            <div className="text-[9px] text-slate-700 font-normal leading-tight">खापर पणजोबा</div>
+            <div className="text-[11px] font-bold text-slate-950 leading-tight">{greatGreatGrandfatherName}</div>
           </div>
           {/* Connector down */}
-          <div className="w-0.5 h-3.5 bg-slate-800"></div>
+          <div className="w-0.5 h-2 bg-slate-800"></div>
         </div>
 
         {/* Level 2: पणजोबा */}
         <div className="flex flex-col items-center">
-          <div className="border border-slate-900 bg-slate-50 px-3 py-1 font-semibold text-center min-w-[170px] shadow-2xs">
-            <div className="text-[10px] text-slate-700 font-normal">पणजोबा</div>
-            <div className="text-xs font-bold text-slate-950">{greatGrandfatherName}</div>
+          <div className="border border-slate-900 bg-slate-50 px-2.5 py-0.5 font-semibold text-center min-w-[150px] shadow-2xs">
+            <div className="text-[9px] text-slate-700 font-normal leading-tight">पणजोबा</div>
+            <div className="text-[11px] font-bold text-slate-950 leading-tight">{greatGrandfatherName}</div>
           </div>
           {/* Connector down */}
-          <div className="w-0.5 h-3.5 bg-slate-800"></div>
+          <div className="w-0.5 h-2 bg-slate-800"></div>
         </div>
 
         {/* Level 3: आजोबा */}
         <div className="flex flex-col items-center">
-          <div className="border border-slate-900 bg-slate-50 px-3 py-1 font-semibold text-center min-w-[170px] shadow-2xs">
-            <div className="text-[10px] text-slate-700 font-normal">आजोबा</div>
-            <div className="text-xs font-bold text-slate-950">{grandfatherName}</div>
+          <div className="border border-slate-900 bg-slate-50 px-2.5 py-0.5 font-semibold text-center min-w-[150px] shadow-2xs">
+            <div className="text-[9px] text-slate-700 font-normal leading-tight">आजोबा</div>
+            <div className="text-[11px] font-bold text-slate-950 leading-tight">{grandfatherName}</div>
           </div>
           {/* Connector down */}
-          <div className="w-0.5 h-3.5 bg-slate-800"></div>
+          <div className="w-0.5 h-2 bg-slate-800"></div>
         </div>
 
         {/* Level 4: वडील and काका (Uncles) Branch */}
         <div className="relative flex flex-col items-center w-full">
           {/* Horizontal crossbar connecting Father and Uncles */}
-          <div className="flex items-start justify-center gap-4 sm:gap-6 w-full max-w-full overflow-x-auto py-1">
+          <div className="flex items-start justify-center gap-3 sm:gap-4 w-full max-w-full overflow-x-auto py-0.5">
             
             {/* Father's Branch */}
-            <div className="flex flex-col items-center min-w-[160px]">
-              <div className="w-0.5 h-2.5 bg-slate-800 mb-0"></div>
-              <div className="border-2 border-slate-900 bg-amber-50/70 px-3 py-1 font-semibold text-center w-full">
-                <div className="text-[10px] text-slate-700 font-normal">वडील</div>
-                <div className="text-xs font-bold text-slate-950">{fatherName}</div>
+            <div className="flex flex-col items-center min-w-[150px]">
+              <div className="w-0.5 h-1.5 bg-slate-800 mb-0"></div>
+              <div className="border-2 border-slate-900 bg-amber-50/70 px-2.5 py-0.5 font-semibold text-center w-full">
+                <div className="text-[9px] text-slate-700 font-normal leading-tight">वडील</div>
+                <div className="text-[11px] font-bold text-slate-950 leading-tight">{fatherName}</div>
               </div>
 
               {/* Connector to Level 5 (Applicant & Siblings) */}
-              <div className="w-0.5 h-3.5 bg-slate-800"></div>
+              <div className="w-0.5 h-2 bg-slate-800"></div>
 
               {/* Level 5: Applicant & Siblings */}
               <div className="flex items-start justify-center gap-2 flex-wrap">

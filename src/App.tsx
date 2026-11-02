@@ -70,8 +70,15 @@ export default function App() {
     }));
   };
 
-  const handlePrint = () => {
-    window.print();
+  const handlePrint = (printAll: boolean = true) => {
+    if (printAll && activePagePreview !== 0) {
+      setActivePagePreview(0);
+      setTimeout(() => {
+        window.print();
+      }, 150);
+    } else {
+      window.print();
+    }
   };
 
   const handleLoadDemo = () => {
@@ -137,7 +144,7 @@ export default function App() {
 
       {/* Top Bar strictly compliant with the Top Bar Contract */}
       <Header
-        onPrintAll={handlePrint}
+        onPrintAll={() => handlePrint(true)}
         onLoadDemo={handleLoadDemo}
         onReset={handleReset}
         onExportJson={handleExportJson}
@@ -207,7 +214,7 @@ export default function App() {
             </span>
             <button
               type="button"
-              onClick={handlePrint}
+              onClick={() => handlePrint(true)}
               className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 text-white font-bold rounded-md hover:bg-indigo-700 transition-colors shadow-2xs"
             >
               <Printer className="w-3.5 h-3.5" />
@@ -280,21 +287,32 @@ export default function App() {
                 </button>
               </div>
 
+              {activePagePreview !== 0 && (
+                <button
+                  type="button"
+                  onClick={() => handlePrint(false)}
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-white font-semibold text-xs rounded-md shadow-xs transition-colors whitespace-nowrap"
+                  title={`फक्त चालू पृष्ठ ${activePagePreview} प्रिंट करा`}
+                >
+                  <Printer className="w-3.5 h-3.5" />
+                  <span>फक्त पृष्ठ {activePagePreview}</span>
+                </button>
+              )}
               <button
                 type="button"
-                onClick={handlePrint}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-md shadow-xs transition-colors"
+                onClick={() => handlePrint(true)}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-md shadow-xs transition-colors whitespace-nowrap"
               >
                 <Printer className="w-4 h-4" />
-                <span>प्रिंट / PDF सेव्ह करा</span>
+                <span>सर्व ६ पाने प्रिंट करा</span>
               </button>
             </div>
           </div>
 
           {/* Document Preview Canvas Area */}
-          <div className="flex-1 overflow-y-auto p-4 sm:p-8 flex flex-col items-center gap-8">
+          <div className="preview-scroll-area flex-1 overflow-y-auto p-4 sm:p-8 flex flex-col items-center gap-8">
             <div
-              className="flex flex-col items-center gap-8 transition-transform origin-top"
+              className="print-pages-wrapper flex flex-col items-center gap-8 transition-transform origin-top"
               style={{ transform: `scale(${zoomLevel / 100})` }}
             >
               {/* Page 1: नमुना "अ" */}

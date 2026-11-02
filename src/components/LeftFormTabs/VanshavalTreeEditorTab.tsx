@@ -310,9 +310,20 @@ export const VanshavalTreeEditorTab: React.FC<VanshavalTreeEditorTabProps> = ({ 
           <span>शाळा सोडल्याच्या दाखल्यावर नाव बदल / तफावत असल्यास</span>
         </div>
 
-        <p className="text-[11px] text-slate-600">
-          दाखल्यावर जुने नाव व आधार कार्ड / इतर कागदपत्रांवर नवीन नाव असल्यास दोन्ही एकच व्यक्ती असल्याचा खुलासा:
-        </p>
+        <div className="flex items-center justify-between">
+          <p className="text-[11px] text-slate-600">
+            दाखल्यावर जुने नाव व आधार/कागदपत्रांवर नवीन नाव असल्यास दोन्ही एकच व्यक्ती असल्याचा खुलासा (नाव बदल नसल्यास दोन्ही रकाने रिकामे ठेवा):
+          </p>
+          {(data.oldNameOnLC || data.newNameOfficial) && (
+            <button
+              type="button"
+              onClick={() => onChange({ oldNameOnLC: '', newNameOfficial: '' })}
+              className="text-[11px] font-bold text-red-600 hover:text-red-800 underline shrink-0 ml-2"
+            >
+              दोन्ही नावे रिकामी करा (Clear)
+            </button>
+          )}
+        </div>
 
         <div>
           <label className="font-semibold text-slate-700 block mb-1">
@@ -338,7 +349,7 @@ export const VanshavalTreeEditorTab: React.FC<VanshavalTreeEditorTabProps> = ({ 
               type="text"
               value={data.oldNameOnLC}
               onChange={(e) => onChange({ oldNameOnLC: e.target.value })}
-              placeholder="उदा. रामदास यशवंत भिल्ल"
+              placeholder="लागू नसल्यास रिकामे ठेवा"
               className="w-full px-2.5 py-1.5 border border-slate-300 rounded-md bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500 text-slate-900"
             />
           </div>
@@ -351,7 +362,7 @@ export const VanshavalTreeEditorTab: React.FC<VanshavalTreeEditorTabProps> = ({ 
               type="text"
               value={data.newNameOfficial}
               onChange={(e) => onChange({ newNameOfficial: e.target.value })}
-              placeholder="उदा. रामदास यशवंत भोये"
+              placeholder="लागू नसल्यास रिकामे ठेवा"
               className="w-full px-2.5 py-1.5 border border-slate-300 rounded-md bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500 text-slate-900"
             />
           </div>
@@ -359,7 +370,7 @@ export const VanshavalTreeEditorTab: React.FC<VanshavalTreeEditorTabProps> = ({ 
 
         {/* Live preview sentence */}
         <div className="p-2 bg-white border border-amber-200 rounded text-[11px] text-slate-800 leading-relaxed italic">
-          "तसेच {data.nameDiscrepancyPerson || 'माझे'}/वडिलांच्या/आजोबांच्या शाळा सोडल्याच्या दाखल्यावर <b>{data.oldNameOnLC || '[जुने नाव]'}</b> असे नाव आहे तरी <b>{data.oldNameOnLC || '[जुने नाव]'}</b> व <b>{data.newNameOfficial || '[नवीन नाव]'}</b> ही दोन्ही नाव {data.nameDiscrepancyPerson || 'माझे'}/ वडील / आजोबा ची आहेत ही दुसरी व्यक्ती नसून एकच व्यक्ती आहे."
+          "तसेच {data.nameDiscrepancyPerson || 'माझे'}/वडिलांच्या/आजोबांच्या शाळा सोडल्याच्या दाखल्यावर <b>{data.oldNameOnLC || '____________________'}</b> असे नाव आहे तरी <b>{data.oldNameOnLC || '____________________'}</b> व <b>{data.newNameOfficial || '____________________'}</b> ही दोन्ही नाव {data.nameDiscrepancyPerson || 'माझे'}/ वडील / आजोबा ची आहेत ही दुसरी व्यक्ती नसून एकच व्यक्ती आहे."
         </div>
       </div>
     </div>

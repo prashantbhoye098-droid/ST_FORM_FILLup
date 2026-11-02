@@ -2,5 +2,7 @@
   "name": "ST जात प्रमाणपत्र अर्ज व वंशावळ जनरेटर",
   "description": "अनुसूचित जमाती (ST) जात प्रमाणपत्र अर्ज नमुना 'अ', 'अ-१', नमुना ३ (वंशावळ) व प्रपत्र-अ-ब डिजिटल फॉर्म जनरेटर व प्रिंटर",
   "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
 }
