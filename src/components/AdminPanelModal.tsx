@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { AdminSettings } from '../types/admin';
+import { AdminSettings, SubscribedCenter } from '../types/admin';
 import {
   X,
   Lock,
@@ -15,12 +15,23 @@ import {
   Save,
   RotateCcw,
   Eye,
+  EyeOff,
   KeyRound,
   CheckCircle,
   AlertTriangle,
   Upload,
   Sliders,
-  DollarSign
+  DollarSign,
+  Users,
+  Smartphone,
+  Copy,
+  Check,
+  Plus,
+  Trash2,
+  Crown,
+  Calendar,
+  Building2,
+  ExternalLink
 } from 'lucide-react';
 
 interface AdminPanelModalProps {
@@ -29,6 +40,8 @@ interface AdminPanelModalProps {
   settings: AdminSettings;
   onSaveSettings: (newSettings: AdminSettings) => void;
   onResetDefault: () => void;
+  subscribedCenters: SubscribedCenter[];
+  onUpdateSubscribedCenters: (centers: SubscribedCenter[]) => void;
 }
 
 export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
@@ -36,12 +49,14 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
   onClose,
   settings,
   onSaveSettings,
-  onResetDefault
+  onResetDefault,
+  subscribedCenters,
+  onUpdateSubscribedCenters
 }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [passwordInput, setPasswordInput] = useState('');
   const [passwordError, setPasswordError] = useState('');
-  const [activeTab, setActiveTab] = useState<'watermark' | 'payment' | 'branding' | 'tabs' | 'banner' | 'text' | 'security'>('watermark');
+  const [activeTab, setActiveTab] = useState<'watermark' | 'payment' | 'centers' | 'branding' | 'tabs' | 'banner' | 'text' | 'security'>('centers');
 
   // Local draft of settings being edited in modal
   const [draft, setDraft] = useState<AdminSettings>(settings);
@@ -50,6 +65,18 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
   // New password state for security tab
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+
+  // Centers tab states
+  const [showAddCenterModal, setShowAddCenterModal] = useState(false);
+  const [newCenterName, setNewCenterName] = useState('');
+  const [newOwnerName, setNewOwnerName] = useState('');
+  const [newMobile, setNewMobile] = useState('');
+  const [newVillage, setNewVillage] = useState('');
+  const [newTaluka, setNewTaluka] = useState('बागलाण');
+  const [newDistrict, setNewDistrict] = useState('नाशिक');
+  const [newPlan, setNewPlan] = useState<'monthly' | 'quarterly' | 'yearly' | 'lifetime'>('yearly');
+  const [revealedPasswords, setRevealedPasswords] = useState<Record<string, boolean>>({});
+  const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
   if (!isOpen) return null;
 
@@ -121,6 +148,117 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
       };
       reader.readAsDataURL(file);
     }
+  };
+
+  const handleCopyText = (text: string, id: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedKey(id);
+    setTimeout(() => setCopiedKey(null), 2500);
+  };
+
+  const handleCreateCenterManually = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newCenterName.trim() || !newOwnerName.trim() || !newMobile.trim()) {
+      alert('कृपया केंद्राचे नाव, चालकाचे नाव आणि मोबाईल नंबर भरा.');
+      return;
+    }
+
+    const random4 = Math.floor(1000 + Math.random() * 9000);
+    const newId = `MSK-${random4}`;
+    const random3 = Math.floor(100 + Math.random() * 900);
+    const newPass = `M@uli${random3}`;
+
+    const now = new Date();
+    const expiry = new Date();
+    if (newPlan === 'monthly') expiry.setDate(now.getDate() + 30);
+    else if (newPlan === 'quarterly') expiry.setDate(now.getDate() + 90);
+    else if (newPlan === 'yearly') expiry.setDate(now.getDate() + 365);
+    else expiry.setFullYear(now.getFullYear() + 25);
+
+    const created: SubscribedCenter = {
+      id: newId,
+      password: newPass,
+      centerName: newCenterName.trim(),
+      ownerName: newOwnerName.trim(),
+      mobile: newMobile.trim(),
+      village: newVillage.trim() || 'पाथवे',
+      taluka: newTaluka.trim() || 'बागलाण',
+      district: newDistrict.trim() || 'नाशिक',
+      plan: newPlan,
+      amountPaid:
+        newPlan === 'monthly'
+          ? draft.payment.monthlyPlanPrice
+          : newPlan === 'quarterly'
+          ? draft.payment.quarterlyPlanPrice
+          : newPlan === 'yearly'
+          ? draft.payment.yearlyPlanPrice
+          : draft.payment.lifetimePlanPrice,
+      utrNumber: 'ADMIN-MANUAL',
+      registeredAt: now.toISOString(),
+      expiresAt: expiry.toISOString(),
+      status: 'active',
+      lastLoginAt: now.toISOString()
+    };
+
+    onUpdateSubscribedCenters([created, ...subscribedCenters]);
+    setShowAddCenterModal(false);
+    setNewCenterName('');
+    setNewOwnerName('');
+    setNewMobile('');
+    setNewVillage('');
+    alert(`नवीन केंद्र तयार झाले!\nआयडी: ${newId}\nपासवर्ड: ${newPass}`);
+  };
+
+  const handleToggleCenterStatus = (id: string) => {
+    const updated = subscribedCenters.map((c) => {
+      if (c.id === id) {
+        const nextStatus: 'active' | 'suspended' = c.status === 'active' ? 'suspended' : 'active';
+        return { ...c, status: nextStatus };
+      }
+      return c;
+    });
+    onUpdateSubscribedCenters(updated);
+  };
+
+  const handleExtendCenter = (id: string, type: 'month' | 'year') => {
+    const updated = subscribedCenters.map((c) => {
+      if (c.id === id) {
+        const currentExp = new Date(c.expiresAt);
+        const baseDate = currentExp > new Date() ? currentExp : new Date();
+        if (type === 'month') {
+          baseDate.setDate(baseDate.getDate() + 30);
+        } else {
+          baseDate.setDate(baseDate.getDate() + 365);
+        }
+        return { ...c, expiresAt: baseDate.toISOString(), status: 'active' as const };
+      }
+      return c;
+    });
+    onUpdateSubscribedCenters(updated);
+    alert('सबस्क्रिप्शन वैधता यशस्वीरित्या वाढवली!');
+  };
+
+  const handleDeleteCenter = (id: string) => {
+    if (window.confirm('हे केंद्र आणि त्याचा आयडी-पासवर्ड कायमचा हटवायचा का?')) {
+      onUpdateSubscribedCenters(subscribedCenters.filter((c) => c.id !== id));
+    }
+  };
+
+  const handleSendWhatsAppCreds = (center: SubscribedCenter) => {
+    const cleanMobile = center.mobile.replace(/\D/g, '');
+    const fullMobile = cleanMobile.length === 10 ? `91${cleanMobile}` : cleanMobile;
+    const expiryStr = new Date(center.expiresAt).toLocaleDateString('mr-IN');
+    const text = `*माऊली डिजिटल सेवा केंद्र - अधिकृत पोर्टल प्रवेश माहिती*\n` +
+      `----------------------------------------\n` +
+      `🏢 *केंद्राचे नाव:* ${center.centerName}\n` +
+      `👤 *चालकाचे नाव:* ${center.ownerName}\n` +
+      `🔑 *आपला केंद्र आयडी (ID):* ${center.id}\n` +
+      `🔒 *आपला पासवर्ड (Password):* ${center.password}\n` +
+      `📅 *सबस्क्रिप्शन वैधता:* ${expiryStr}\n\n` +
+      `🌐 *पोर्टल लिंक:* https://maulidigitalsevakendrapathavedigar.blogspot.com\n` +
+      `----------------------------------------\n` +
+      `⚠️ हा आयडी व पासवर्ड सुरक्षित ठेवा.`;
+    window.open(`https://wa.me/${fullMobile}?text=${encodeURIComponent(text)}`, '_blank');
   };
 
   return (
@@ -243,6 +381,24 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
 
               <button
                 type="button"
+                onClick={() => setActiveTab('centers')}
+                className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-all text-left ${
+                  activeTab === 'centers'
+                    ? 'bg-amber-500 text-slate-950 shadow-xs font-black'
+                    : 'text-slate-700 hover:bg-slate-200'
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <Users className="w-4 h-4 text-amber-600" />
+                  <span>३. केंद्रे, ID-PW व सबस्क्रिप्शन</span>
+                </div>
+                <span className="text-[10px] bg-slate-200 px-1.5 py-0.2 rounded font-mono">
+                  {subscribedCenters.length}
+                </span>
+              </button>
+
+              <button
+                type="button"
                 onClick={() => setActiveTab('branding')}
                 className={`w-full flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs font-bold transition-all text-left ${
                   activeTab === 'branding'
@@ -251,7 +407,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                 }`}
               >
                 <Sliders className="w-4 h-4" />
-                <span>३. ब्रँडिंग व केंद्र माहिती</span>
+                <span>४. ब्रँडिंग व केंद्र माहिती</span>
               </button>
 
               <button
@@ -617,65 +773,194 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                     </label>
                   </div>
 
-                  {/* Fees Configuration */}
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 p-4 bg-slate-50 rounded-xl border border-slate-200">
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1">
-                        प्रति पान फी (Per Page Fee)
-                      </label>
-                      <div className="relative">
-                        <span className="absolute left-3 top-2 text-slate-400 font-bold text-xs">₹</span>
+                  {/* 100% Paid Portal Gatekeeper Master Toggle */}
+                  <div className="p-4 bg-gradient-to-r from-amber-500/15 via-orange-500/10 to-amber-500/15 rounded-2xl border-2 border-amber-400/80 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Lock className="w-5 h-5 text-amber-600" />
+                        <div>
+                          <div className="text-sm font-black text-slate-900">
+                            🔒 १००% सक्तीचे पेड पोर्टल (Enforce 100% Paid Gatekeeper)
+                          </div>
+                          <div className="text-[11px] text-slate-600">
+                            चालू असल्यास: नोंदणीकृत आयडी-पासवर्ड किंवा सबस्क्रिप्शन घेतल्याशिवाय कोणीही पोर्टल वापरू शकत नाही!
+                          </div>
+                        </div>
+                      </div>
+                      <label className="relative inline-flex items-center cursor-pointer">
                         <input
-                          type="number"
-                          value={draft.payment.perPageFee}
+                          type="checkbox"
+                          checked={draft.payment.enforcePaidLogin}
                           onChange={(e) =>
                             setDraft((prev) => ({
                               ...prev,
-                              payment: { ...prev.payment, perPageFee: parseInt(e.target.value) || 10 }
+                              payment: { ...prev.payment, enforcePaidLogin: e.target.checked }
                             }))
                           }
-                          className="w-full pl-7 pr-3 py-1.5 text-xs font-bold border border-slate-300 rounded-lg"
+                          className="sr-only peer"
                         />
-                      </div>
+                        <div className="w-11 h-6 bg-slate-300 peer-focus:outline-hidden rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-600"></div>
+                      </label>
                     </div>
 
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1">
-                        मासिक सबस्क्रिप्शन दर
-                      </label>
-                      <div className="relative">
-                        <span className="absolute left-3 top-2 text-slate-400 font-bold text-xs">₹</span>
+                    <div className="pt-2 border-t border-amber-200/80 flex items-center justify-between text-xs">
+                      <span className="text-slate-700 font-bold">नवीन नोंदणी झाल्यावर तत्काळ आयडी-पासवर्ड ॲक्टिव्हेट करा (Auto-Approve):</span>
+                      <label className="flex items-center gap-1.5 cursor-pointer font-bold">
                         <input
-                          type="number"
-                          value={draft.payment.monthlyPlanPrice}
+                          type="checkbox"
+                          checked={draft.payment.autoApproveNewRegistrations}
                           onChange={(e) =>
                             setDraft((prev) => ({
                               ...prev,
-                              payment: { ...prev.payment, monthlyPlanPrice: parseInt(e.target.value) || 199 }
+                              payment: { ...prev.payment, autoApproveNewRegistrations: e.target.checked }
                             }))
                           }
-                          className="w-full pl-7 pr-3 py-1.5 text-xs font-bold border border-slate-300 rounded-lg"
+                          className="w-4 h-4 text-amber-600 rounded"
                         />
-                      </div>
+                        <span>{draft.payment.autoApproveNewRegistrations ? 'चालू' : 'बंद'}</span>
+                      </label>
                     </div>
+                  </div>
 
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1">
-                        वार्षिक सबस्क्रिप्शन दर
-                      </label>
-                      <div className="relative">
-                        <span className="absolute left-3 top-2 text-slate-400 font-bold text-xs">₹</span>
+                  {/* Anti-Theft & Copy Protection */}
+                  <div className="p-3.5 bg-slate-900 text-white rounded-xl space-y-2">
+                    <div className="text-xs font-black text-amber-400 flex items-center gap-1.5">
+                      <ShieldCheck className="w-4 h-4" />
+                      <span>वेबसाईट कोड व कॉपी संरक्षण (Anti-Theft Protection)</span>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
+                      <label className="flex items-center gap-2 cursor-pointer bg-slate-800 p-2 rounded-lg">
                         <input
-                          type="number"
-                          value={draft.payment.yearlyPlanPrice}
+                          type="checkbox"
+                          checked={draft.antiCopy?.disableRightClick ?? true}
                           onChange={(e) =>
                             setDraft((prev) => ({
                               ...prev,
-                              payment: { ...prev.payment, yearlyPlanPrice: parseInt(e.target.value) || 1199 }
+                              antiCopy: { ...(prev.antiCopy || { disableInspectShortcuts: true, disableTextSelection: true }), disableRightClick: e.target.checked }
                             }))
                           }
-                          className="w-full pl-7 pr-3 py-1.5 text-xs font-bold border border-slate-300 rounded-lg"
+                          className="w-4 h-4 text-amber-500 rounded"
                         />
+                        <span className="text-slate-200">राईट-क्लिक बंद</span>
+                      </label>
+
+                      <label className="flex items-center gap-2 cursor-pointer bg-slate-800 p-2 rounded-lg">
+                        <input
+                          type="checkbox"
+                          checked={draft.antiCopy?.disableInspectShortcuts ?? true}
+                          onChange={(e) =>
+                            setDraft((prev) => ({
+                              ...prev,
+                              antiCopy: { ...(prev.antiCopy || { disableRightClick: true, disableTextSelection: true }), disableInspectShortcuts: e.target.checked }
+                            }))
+                          }
+                          className="w-4 h-4 text-amber-500 rounded"
+                        />
+                        <span className="text-slate-200">Inspect/Ctrl+U बंद</span>
+                      </label>
+
+                      <label className="flex items-center gap-2 cursor-pointer bg-slate-800 p-2 rounded-lg">
+                        <input
+                          type="checkbox"
+                          checked={draft.antiCopy?.disableTextSelection ?? true}
+                          onChange={(e) =>
+                            setDraft((prev) => ({
+                              ...prev,
+                              antiCopy: { ...(prev.antiCopy || { disableRightClick: true, disableInspectShortcuts: true }), disableTextSelection: e.target.checked }
+                            }))
+                          }
+                          className="w-4 h-4 text-amber-500 rounded"
+                        />
+                        <span className="text-slate-200">मजकूर कॉपी रोखा</span>
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* Fees Configuration - 4 Plans */}
+                  <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-3">
+                    <h5 className="font-extrabold text-xs text-slate-800 uppercase tracking-wider">
+                      सबस्क्रिप्शन प्लॅन्सचे दर नियंत्रण (Subscription Pricing)
+                    </h5>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                      <div>
+                        <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                          मासिक (Monthly)
+                        </label>
+                        <div className="relative">
+                          <span className="absolute left-2.5 top-1.5 text-slate-400 font-bold text-xs">₹</span>
+                          <input
+                            type="number"
+                            value={draft.payment.monthlyPlanPrice}
+                            onChange={(e) =>
+                              setDraft((prev) => ({
+                                ...prev,
+                                payment: { ...prev.payment, monthlyPlanPrice: parseInt(e.target.value) || 199 }
+                              }))
+                            }
+                            className="w-full pl-6 pr-2 py-1.5 text-xs font-bold border border-slate-300 rounded-lg font-mono"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                          त्रैमासिक (Quarterly)
+                        </label>
+                        <div className="relative">
+                          <span className="absolute left-2.5 top-1.5 text-slate-400 font-bold text-xs">₹</span>
+                          <input
+                            type="number"
+                            value={draft.payment.quarterlyPlanPrice || 499}
+                            onChange={(e) =>
+                              setDraft((prev) => ({
+                                ...prev,
+                                payment: { ...prev.payment, quarterlyPlanPrice: parseInt(e.target.value) || 499 }
+                              }))
+                            }
+                            className="w-full pl-6 pr-2 py-1.5 text-xs font-bold border border-slate-300 rounded-lg font-mono"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                          वार्षिक (Yearly)
+                        </label>
+                        <div className="relative">
+                          <span className="absolute left-2.5 top-1.5 text-slate-400 font-bold text-xs">₹</span>
+                          <input
+                            type="number"
+                            value={draft.payment.yearlyPlanPrice}
+                            onChange={(e) =>
+                              setDraft((prev) => ({
+                                ...prev,
+                                payment: { ...prev.payment, yearlyPlanPrice: parseInt(e.target.value) || 1499 }
+                              }))
+                            }
+                            className="w-full pl-6 pr-2 py-1.5 text-xs font-bold border border-slate-300 rounded-lg font-mono"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                          लाइफटाईम (Lifetime)
+                        </label>
+                        <div className="relative">
+                          <span className="absolute left-2.5 top-1.5 text-slate-400 font-bold text-xs">₹</span>
+                          <input
+                            type="number"
+                            value={draft.payment.lifetimePlanPrice || 2999}
+                            onChange={(e) =>
+                              setDraft((prev) => ({
+                                ...prev,
+                                payment: { ...prev.payment, lifetimePlanPrice: parseInt(e.target.value) || 2999 }
+                              }))
+                            }
+                            className="w-full pl-6 pr-2 py-1.5 text-xs font-bold border border-slate-300 rounded-lg font-mono"
+                          />
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -792,7 +1077,315 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                 </div>
               )}
 
-              {/* TAB 3: BRANDING & CENTER INFO */}
+              {/* TAB 3: CENTERS & ID-PASSWORD MANAGEMENT */}
+              {activeTab === 'centers' && (
+                <div className="space-y-4">
+                  <div className="border-b pb-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                    <div>
+                      <h4 className="font-extrabold text-base text-slate-900 flex items-center gap-2">
+                        <Users className="w-5 h-5 text-amber-600" />
+                        <span>अधिकृत केंद्रे, आयडी-पासवर्ड व सबस्क्रिप्शन व्यवस्थापन</span>
+                      </h4>
+                      <p className="text-xs text-slate-500">
+                        सर्व नोंदणीकृत केंद्रांचे आयडी-पासवर्ड पहा, व्हॉट्सॲपवर पाठवा आणि नवीन केंद्रे जोडा.
+                      </p>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => setShowAddCenterModal(!showAddCenterModal)}
+                      className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-sm transition-all cursor-pointer whitespace-nowrap"
+                    >
+                      <Plus className="w-4 h-4" />
+                      <span>+ नवीन केंद्र स्वतः जोडा</span>
+                    </button>
+                  </div>
+
+                  {/* Summary Badges */}
+                  <div className="grid grid-cols-3 gap-2 sm:gap-3">
+                    <div className="bg-slate-100 p-2.5 rounded-xl border border-slate-200 text-center">
+                      <div className="text-[11px] text-slate-500 font-bold">एकूण नोंदणीकृत केंद्रे</div>
+                      <div className="text-lg font-black text-slate-900 font-mono">{subscribedCenters.length}</div>
+                    </div>
+                    <div className="bg-emerald-50 p-2.5 rounded-xl border border-emerald-200 text-center">
+                      <div className="text-[11px] text-emerald-700 font-bold">सक्रिय सबस्क्रिप्शन</div>
+                      <div className="text-lg font-black text-emerald-700 font-mono">
+                        {subscribedCenters.filter((c) => c.status === 'active').length}
+                      </div>
+                    </div>
+                    <div className="bg-amber-50 p-2.5 rounded-xl border border-amber-200 text-center">
+                      <div className="text-[11px] text-amber-800 font-bold">१००% पेड गेटवे स्थिती</div>
+                      <div className="text-xs font-black text-amber-900 mt-1">
+                        {draft.payment.enforcePaidLogin ? '🔒 सक्रिय (सुरक्षित)' : '🔓 मोफत मोड'}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Add Center Manually Form */}
+                  {showAddCenterModal && (
+                    <form onSubmit={handleCreateCenterManually} className="p-4 bg-amber-50 border-2 border-amber-300 rounded-2xl space-y-3 animate-fade-in">
+                      <div className="flex items-center justify-between border-b border-amber-200 pb-2">
+                        <span className="font-extrabold text-xs text-amber-950 flex items-center gap-1.5">
+                          <Plus className="w-4 h-4 text-amber-600" />
+                          <span>नवीन केंद्र चालकासाठी आयडी-पासवर्ड तयार करा</span>
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => setShowAddCenterModal(false)}
+                          className="text-amber-800 hover:text-amber-950 text-xs font-bold"
+                        >
+                          रद्द करा
+                        </button>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                        <div>
+                          <label className="block text-[11px] font-bold text-slate-700 mb-1">केंद्राचे नाव: *</label>
+                          <input
+                            type="text"
+                            value={newCenterName}
+                            onChange={(e) => setNewCenterName(e.target.value)}
+                            placeholder="उदा. साई डिजिटल सेवा केंद्र"
+                            className="w-full bg-white border border-slate-300 rounded-lg px-3 py-1.5 text-xs font-medium"
+                            required
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-[11px] font-bold text-slate-700 mb-1">चालकाचे नाव: *</label>
+                          <input
+                            type="text"
+                            value={newOwnerName}
+                            onChange={(e) => setNewOwnerName(e.target.value)}
+                            placeholder="उदा. सागर सुरेश भामरे"
+                            className="w-full bg-white border border-slate-300 rounded-lg px-3 py-1.5 text-xs font-medium"
+                            required
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-[11px] font-bold text-slate-700 mb-1">मोबाईल नंबर: *</label>
+                          <input
+                            type="tel"
+                            maxLength={10}
+                            value={newMobile}
+                            onChange={(e) => setNewMobile(e.target.value.replace(/\D/g, ''))}
+                            placeholder="१० अंकी नंबर"
+                            className="w-full bg-white border border-slate-300 rounded-lg px-3 py-1.5 text-xs font-mono font-medium"
+                            required
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-[11px] font-bold text-slate-700 mb-1">सबस्क्रिप्शन प्लॅन:</label>
+                          <select
+                            value={newPlan}
+                            onChange={(e) => setNewPlan(e.target.value as any)}
+                            className="w-full bg-white border border-slate-300 rounded-lg px-3 py-1.5 text-xs font-bold"
+                          >
+                            <option value="monthly">मासिक (३० दिवस) - ₹{draft.payment.monthlyPlanPrice}</option>
+                            <option value="quarterly">त्रैमासिक (९० दिवस) - ₹{draft.payment.quarterlyPlanPrice || 499}</option>
+                            <option value="yearly">वार्षिक (१ वर्ष) - ₹{draft.payment.yearlyPlanPrice}</option>
+                            <option value="lifetime">लाइफटाईम (कायमस्वरूपी) - ₹{draft.payment.lifetimePlanPrice || 2999}</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <div className="flex justify-end gap-2 pt-2 border-t border-amber-200">
+                        <button
+                          type="button"
+                          onClick={() => setShowAddCenterModal(false)}
+                          className="px-3 py-1.5 bg-slate-200 text-slate-700 text-xs font-bold rounded-lg"
+                        >
+                          रद्द करा
+                        </button>
+                        <button
+                          type="submit"
+                          className="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black rounded-lg shadow-sm"
+                        >
+                          तयार करा व आयडी-पासवर्ड द्या
+                        </button>
+                      </div>
+                    </form>
+                  )}
+
+                  {/* Centers List */}
+                  <div className="space-y-3">
+                    <h5 className="font-extrabold text-xs text-slate-700 uppercase tracking-wider">
+                      नोंदणीकृत केंद्रांची यादी ({subscribedCenters.length})
+                    </h5>
+
+                    {subscribedCenters.length === 0 ? (
+                      <div className="p-8 text-center bg-slate-50 rounded-2xl border border-slate-200 text-slate-500 text-xs">
+                        अद्याप कोणतेही केंद्र नोंदणीकृत नाही. वरून "+ नवीन केंद्र स्वतः जोडा" बटण वापरून नवीन आयडी-पासवर्ड तयार करा.
+                      </div>
+                    ) : (
+                      <div className="space-y-2.5">
+                        {subscribedCenters.map((center) => {
+                          const isExpired = new Date(center.expiresAt) < new Date() && center.plan !== 'lifetime';
+                          const isRevealed = revealedPasswords[center.id];
+
+                          return (
+                            <div
+                              key={center.id}
+                              className={`p-3.5 rounded-2xl border transition-all ${
+                                center.status === 'suspended'
+                                  ? 'bg-rose-50/60 border-rose-200'
+                                  : isExpired
+                                  ? 'bg-amber-50/60 border-amber-200'
+                                  : 'bg-white border-slate-200 shadow-2xs hover:shadow-xs'
+                              }`}
+                            >
+                              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-b border-slate-100 pb-2">
+                                <div className="flex items-center gap-2">
+                                  <Building2 className="w-4 h-4 text-amber-600 shrink-0" />
+                                  <span className="font-extrabold text-sm text-slate-900">{center.centerName}</span>
+                                  <span className="text-xs text-slate-500">({center.ownerName})</span>
+                                </div>
+
+                                <div className="flex items-center gap-1.5 self-end sm:self-auto">
+                                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                                    center.status === 'suspended'
+                                      ? 'bg-rose-100 text-rose-700 border border-rose-300'
+                                      : isExpired
+                                      ? 'bg-amber-100 text-amber-800 border border-amber-300'
+                                      : 'bg-emerald-100 text-emerald-700 border border-emerald-300'
+                                  }`}>
+                                    {center.status === 'suspended' ? 'स्थगित (Suspended)' : isExpired ? 'मुदत संपली (Expired)' : 'सक्रिय (Active)'}
+                                  </span>
+
+                                  <span className="text-[10px] bg-slate-100 text-slate-700 font-bold px-2 py-0.5 rounded-full uppercase">
+                                    {center.plan}
+                                  </span>
+                                </div>
+                              </div>
+
+                              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 py-2 text-xs">
+                                {/* ID Box */}
+                                <div className="flex items-center justify-between bg-slate-50 p-2 rounded-lg border border-slate-200">
+                                  <span className="text-slate-500 text-[11px]">केंद्र आयडी:</span>
+                                  <div className="flex items-center gap-1">
+                                    <span className="font-mono font-black text-amber-700">{center.id}</span>
+                                    <button
+                                      type="button"
+                                      onClick={() => handleCopyText(center.id, `id_${center.id}`)}
+                                      className="text-slate-400 hover:text-slate-700 p-0.5"
+                                      title="आयडी कॉपी करा"
+                                    >
+                                      {copiedKey === `id_${center.id}` ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                                    </button>
+                                  </div>
+                                </div>
+
+                                {/* Password Box */}
+                                <div className="flex items-center justify-between bg-slate-50 p-2 rounded-lg border border-slate-200">
+                                  <span className="text-slate-500 text-[11px]">पासवर्ड:</span>
+                                  <div className="flex items-center gap-1">
+                                    <span className="font-mono font-black text-slate-800">
+                                      {isRevealed ? center.password : '••••••••'}
+                                    </span>
+                                    <button
+                                      type="button"
+                                      onClick={() =>
+                                        setRevealedPasswords((prev) => ({
+                                          ...prev,
+                                          [center.id]: !prev[center.id]
+                                        }))
+                                      }
+                                      className="text-slate-400 hover:text-slate-700 p-0.5"
+                                      title="पासवर्ड पहा / लपवा"
+                                    >
+                                      {isRevealed ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => handleCopyText(center.password, `pass_${center.id}`)}
+                                      className="text-slate-400 hover:text-slate-700 p-0.5"
+                                      title="पासवर्ड कॉपी करा"
+                                    >
+                                      {copiedKey === `pass_${center.id}` ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                                    </button>
+                                  </div>
+                                </div>
+
+                                {/* Validity & Mobile */}
+                                <div className="flex items-center justify-between bg-slate-50 p-2 rounded-lg border border-slate-200">
+                                  <span className="text-slate-500 text-[11px]">मोबाईल:</span>
+                                  <span className="font-mono font-bold text-slate-800">{center.mobile}</span>
+                                </div>
+                              </div>
+
+                              {/* Action Buttons for Center */}
+                              <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-100 text-xs">
+                                <div className="text-[11px] text-slate-500">
+                                  वैधता: <b className="text-slate-700">{new Date(center.expiresAt).toLocaleDateString('mr-IN')}</b>
+                                </div>
+
+                                <div className="flex items-center gap-1.5 flex-wrap">
+                                  {/* WhatsApp Credentials Button */}
+                                  <button
+                                    type="button"
+                                    onClick={() => handleSendWhatsAppCreds(center)}
+                                    className="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-bold text-[11px] shadow-2xs transition-colors cursor-pointer"
+                                    title="चालकाला व्हॉट्सॲपवर आयडी व पासवर्ड पाठवा"
+                                  >
+                                    <Smartphone className="w-3 h-3" />
+                                    <span>WhatsApp मेसेज</span>
+                                  </button>
+
+                                  {/* Extend Validity */}
+                                  <button
+                                    type="button"
+                                    onClick={() => handleExtendCenter(center.id, 'month')}
+                                    className="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-bold text-[11px] border border-slate-300"
+                                    title="१ महिना मुदत वाढवा"
+                                  >
+                                    +१ महिना
+                                  </button>
+
+                                  <button
+                                    type="button"
+                                    onClick={() => handleExtendCenter(center.id, 'year')}
+                                    className="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-bold text-[11px] border border-slate-300"
+                                    title="१ वर्ष मुदत वाढवा"
+                                  >
+                                    +१ वर्ष
+                                  </button>
+
+                                  {/* Suspend / Active Toggle */}
+                                  <button
+                                    type="button"
+                                    onClick={() => handleToggleCenterStatus(center.id)}
+                                    className={`px-2 py-1 rounded-lg font-bold text-[11px] border ${
+                                      center.status === 'active'
+                                        ? 'bg-amber-100 hover:bg-amber-200 text-amber-900 border-amber-300'
+                                        : 'bg-emerald-100 hover:bg-emerald-200 text-emerald-900 border-emerald-300'
+                                    }`}
+                                  >
+                                    {center.status === 'active' ? 'स्थगित करा' : 'सक्रिय करा'}
+                                  </button>
+
+                                  {/* Delete */}
+                                  <button
+                                    type="button"
+                                    onClick={() => handleDeleteCenter(center.id)}
+                                    className="p-1 text-slate-400 hover:text-red-600 rounded-lg"
+                                    title="केंद्र हटवा"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* TAB 4: BRANDING & CENTER INFO */}
               {activeTab === 'branding' && (
                 <div className="space-y-4">
                   <div className="border-b pb-2">

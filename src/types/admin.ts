@@ -3,6 +3,24 @@
  * Controls all text, watermarks, payment methods, branding, and tabs
  */
 
+export interface SubscribedCenter {
+  id: string; // e.g. "MSK-1082"
+  password: string; // e.g. "Mauli@492"
+  centerName: string;
+  ownerName: string;
+  mobile: string;
+  village: string;
+  taluka: string;
+  district: string;
+  plan: 'monthly' | 'quarterly' | 'yearly' | 'lifetime';
+  amountPaid: number;
+  utrNumber: string;
+  registeredAt: string;
+  expiresAt: string;
+  status: 'active' | 'pending' | 'suspended';
+  lastLoginAt?: string;
+}
+
 export interface AdminSettings {
   // Authentication
   adminPassword: string; // Master admin password (default: 'mauli@2024')
@@ -19,19 +37,30 @@ export interface AdminSettings {
     antiScreenshotEnabled: boolean; // blocks right click, screen watermark
   };
 
-  // Payment & Monetization Master Control
+  // Payment & Monetization Master Control (100% Paid Portal)
   payment: {
     isPaymentSystemActive: boolean; // Master toggle to activate/deactivate all payments
+    enforcePaidLogin: boolean; // 100% Paid Gatekeeper: Forces ID/Password login before portal access
+    autoApproveNewRegistrations: boolean; // Instantly activate newly purchased ID/Password
     isPayPerPageActive: boolean; // ₹10 / page option
     perPageFee: number; // Default: 10
     isWalletActive: boolean;
     isSubscriptionActive: boolean;
     monthlyPlanPrice: number; // Default: 199
-    yearlyPlanPrice: number; // Default: 1199
-    upiId: string; // Default: 'mauliseva@upi'
+    quarterlyPlanPrice: number; // Default: 499
+    yearlyPlanPrice: number; // Default: 1499
+    lifetimePlanPrice: number; // Default: 2999
+    upiId: string; // Default: 'prashantbhoye098@oksbi'
     payeeName: string; // Default: 'माऊली डिजिटल सेवा केंद्र'
     customQrCodeUrl: string; // Admin can upload/paste custom QR code image
     allowFreeWatermarkedPrint: boolean; // If false, forces payment before any print
+  };
+
+  // Anti-Theft & Anti-Copy Protection
+  antiCopy: {
+    disableRightClick: boolean;
+    disableInspectShortcuts: boolean;
+    disableTextSelection: boolean;
   };
 
   // Branding & Header
@@ -105,16 +134,26 @@ export const DEFAULT_ADMIN_SETTINGS: AdminSettings = {
 
   payment: {
     isPaymentSystemActive: true,
+    enforcePaidLogin: true, // 100% Paid Gatekeeper enabled by default!
+    autoApproveNewRegistrations: true,
     isPayPerPageActive: true,
     perPageFee: 10,
     isWalletActive: true,
     isSubscriptionActive: true,
     monthlyPlanPrice: 199,
-    yearlyPlanPrice: 1199,
-    upiId: 'mauliseva@upi',
+    quarterlyPlanPrice: 499,
+    yearlyPlanPrice: 1499,
+    lifetimePlanPrice: 2999,
+    upiId: 'prashantbhoye098@oksbi',
     payeeName: 'माऊली डिजिटल सेवा केंद्र पाथवे दिगर',
     customQrCodeUrl: '',
-    allowFreeWatermarkedPrint: true
+    allowFreeWatermarkedPrint: false
+  },
+
+  antiCopy: {
+    disableRightClick: true,
+    disableInspectShortcuts: true,
+    disableTextSelection: true
   },
 
   branding: {

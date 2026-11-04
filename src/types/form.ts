@@ -19,9 +19,14 @@ export interface UserProfile {
   email: string;
   photoUrl: string;
   isLoggedIn: boolean;
-  plan: 'free' | 'monthly' | 'yearly';
+  plan: 'free' | 'monthly' | 'quarterly' | 'yearly' | 'lifetime';
   walletBalance: number; // In Rupees (e.g. 50)
   planExpiryDate?: string;
+  centerId?: string; // e.g. "MSK-1001"
+  centerName?: string;
+  mobile?: string;
+  village?: string;
+  isSubscribed?: boolean;
 }
 
 // Income Source Row for उत्पन्नाचा दाखला

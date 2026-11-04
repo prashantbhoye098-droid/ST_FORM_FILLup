@@ -4,8 +4,8 @@ import { X, Check, Sparkles, ShieldCheck, Zap, Award } from 'lucide-react';
 interface SubscriptionModalProps {
   isOpen: boolean;
   onClose: () => void;
-  activePlan: 'monthly' | 'yearly' | 'trial';
-  onSelectPlan: (plan: 'monthly' | 'yearly') => void;
+  activePlan: 'free' | 'monthly' | 'quarterly' | 'yearly' | 'lifetime' | 'trial';
+  onSelectPlan: (plan: 'monthly' | 'quarterly' | 'yearly' | 'lifetime') => void;
 }
 
 export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({

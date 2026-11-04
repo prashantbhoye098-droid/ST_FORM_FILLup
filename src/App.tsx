@@ -31,9 +31,10 @@ import { SelfDeclarationForm } from './components/FormPreview/SelfDeclarationFor
 import { AdminPanelModal } from './components/AdminPanelModal';
 import { AuthModal } from './components/AuthModal';
 import { PaymentModal } from './components/PaymentModal';
-import { BloggerGuideModal } from './components/BloggerGuideModal';
+import { PaidAccessGateModal } from './components/PaidAccessGateModal';
 import { SubscriptionModal } from './components/SubscriptionModal';
 import { SavedProfilesModal } from './components/SavedProfilesModal';
+import { SubscribedCenter } from './types/admin';
 
 import {
   Building2,
@@ -52,22 +53,47 @@ import {
   Bell,
   Sparkles,
   ShieldCheck,
-  ShieldAlert
+  ShieldAlert,
+  Lock
 } from 'lucide-react';
 
 const LOCAL_STORAGE_FORM_KEY = 'st_caste_form_data_draft_v4';
 const LOCAL_STORAGE_PROFILES_KEY = 'village_saved_profiles_v4';
 const LOCAL_STORAGE_ADMIN_KEY = 'assk_admin_settings_v4';
 const LOCAL_STORAGE_USER_KEY = 'assk_user_profile_v4';
+const LOCAL_STORAGE_SUBSCRIBED_CENTERS_KEY = 'assk_subscribed_centers_v4';
+
+const DEFAULT_SUBSCRIBED_CENTERS: SubscribedCenter[] = [
+  {
+    id: 'MSK-1001',
+    password: 'mauli@2024',
+    centerName: 'माऊली डिजिटल सेवा केंद्र पाथवे दिगर',
+    ownerName: 'प्रशांत रामदास भोये',
+    mobile: '9822000000',
+    village: 'पाथवे दिगर',
+    taluka: 'बागलाण',
+    district: 'नाशिक',
+    plan: 'lifetime',
+    amountPaid: 2999,
+    utrNumber: 'MASTER-ADMIN',
+    registeredAt: '2024-01-01T00:00:00.000Z',
+    expiresAt: '2099-12-31T23:59:59.000Z',
+    status: 'active',
+    lastLoginAt: '2024-01-01T00:00:00.000Z'
+  }
+];
 
 const DEFAULT_USER: UserProfile = {
-  id: 'user_1',
+  id: 'MSK-1001',
+  centerId: 'MSK-1001',
   name: 'प्रशांत रामदास भोये',
+  centerName: 'माऊली डिजिटल सेवा केंद्र',
   email: 'prashantbhoye098@gmail.com',
   photoUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80',
   isLoggedIn: true,
-  plan: 'free',
-  walletBalance: 50
+  isSubscribed: true,
+  plan: 'lifetime',
+  walletBalance: 100
 };
 
 export default function App() {
@@ -115,13 +141,69 @@ export default function App() {
     }
   });
 
+  // Subscribed Centers State
+  const [subscribedCenters, setSubscribedCenters] = useState<SubscribedCenter[]>(() => {
+    try {
+      const saved = localStorage.getItem(LOCAL_STORAGE_SUBSCRIBED_CENTERS_KEY);
+      return saved ? JSON.parse(saved) : DEFAULT_SUBSCRIBED_CENTERS;
+    } catch {
+      return DEFAULT_SUBSCRIBED_CENTERS;
+    }
+  });
+
   // Modals state
   const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
-  const [isBloggerGuideModalOpen, setIsBloggerGuideModalOpen] = useState(false);
   const [isSubscriptionModalOpen, setIsSubscriptionModalOpen] = useState(false);
   const [isProfilesModalOpen, setIsProfilesModalOpen] = useState(false);
+
+  // 100% Paid Gatekeeper State
+  const [isPaidGateOpen, setIsPaidGateOpen] = useState<boolean>(() => {
+    if (adminSettings.payment.enforcePaidLogin) {
+      return !userProfile.isSubscribed;
+    }
+    return false;
+  });
+
+  // Anti-Theft & Copy Protection Listeners
+  useEffect(() => {
+    const handleContextMenu = (e: MouseEvent) => {
+      if (adminSettings.antiCopy?.disableRightClick) {
+        e.preventDefault();
+      }
+    };
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (adminSettings.antiCopy?.disableInspectShortcuts) {
+        if (
+          e.key === 'F12' ||
+          (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'J' || e.key === 'j' || e.key === 'C' || e.key === 'c')) ||
+          (e.ctrlKey && (e.key === 'u' || e.key === 'U' || e.key === 's' || e.key === 'S'))
+        ) {
+          e.preventDefault();
+          return false;
+        }
+      }
+    };
+
+    window.addEventListener('contextmenu', handleContextMenu);
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      window.removeEventListener('contextmenu', handleContextMenu);
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [adminSettings.antiCopy]);
+
+  // Auto-save Subscribed Centers
+  useEffect(() => {
+    try {
+      localStorage.setItem(LOCAL_STORAGE_SUBSCRIBED_CENTERS_KEY, JSON.stringify(subscribedCenters));
+    } catch (e) {
+      console.error('Failed to save subscribed centers', e);
+    }
+  }, [subscribedCenters]);
 
   const [activeTab, setActiveTab] = useState<string>('applicant');
   const [activePagePreview, setActivePagePreview] = useState<number>(0); // 0 = all pages, 1..N = specific
@@ -133,6 +215,7 @@ export default function App() {
     !adminSettings.payment.isPaymentSystemActive ||
     !adminSettings.watermark.enabled ||
     userProfile.plan !== 'free' ||
+    userProfile.isSubscribed ||
     hasPaidCurrentDoc;
 
   // Sync Form Data with Admin Settings & Watermark dynamically
@@ -356,7 +439,6 @@ export default function App() {
           onOpenSubscription={() => setIsSubscriptionModalOpen(true)}
           onOpenProfiles={() => setIsProfilesModalOpen(true)}
           onOpenAdmin={() => setIsAdminModalOpen(true)}
-          onOpenBloggerGuide={() => setIsBloggerGuideModalOpen(true)}
           onOpenAuth={() => setIsAuthModalOpen(true)}
           onOpenPayment={() => setIsPaymentModalOpen(true)}
           currentCategory={formData.activeFormCategory}
@@ -722,6 +804,8 @@ export default function App() {
         settings={adminSettings}
         onSaveSettings={(newSettings) => setAdminSettings(newSettings)}
         onResetDefault={() => setAdminSettings(DEFAULT_ADMIN_SETTINGS)}
+        subscribedCenters={subscribedCenters}
+        onUpdateSubscribedCenters={(centers) => setSubscribedCenters(centers)}
       />
 
       {/* Google User Profile & Login Modal */}
@@ -758,10 +842,32 @@ export default function App() {
         }}
       />
 
-      {/* Blogger / Blogspot Embedding Guide Modal */}
-      <BloggerGuideModal
-        isOpen={isBloggerGuideModalOpen}
-        onClose={() => setIsBloggerGuideModalOpen(false)}
+      {/* 100% Paid Portal Gatekeeper & Member Registration Modal */}
+      <PaidAccessGateModal
+        isOpen={isPaidGateOpen}
+        onClose={() => {
+          if (!adminSettings.payment.enforcePaidLogin) {
+            setIsPaidGateOpen(false);
+          }
+        }}
+        adminSettings={adminSettings}
+        subscribedCenters={subscribedCenters}
+        onAddSubscribedCenter={(newCenter) => {
+          setSubscribedCenters((prev) => [newCenter, ...prev]);
+        }}
+        onLoginSuccess={(userData, isAdmin) => {
+          setUserProfile((prev) => ({
+            ...prev,
+            ...userData,
+            isLoggedIn: true,
+            isSubscribed: true
+          }));
+          setIsPaidGateOpen(false);
+          setHasPaidCurrentDoc(true);
+          if (isAdmin) {
+            setIsAdminModalOpen(true);
+          }
+        }}
       />
 
       {/* Subscription Plans Modal */}

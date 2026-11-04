@@ -22,7 +22,6 @@ interface HeaderProps {
   onOpenSubscription: () => void;
   onOpenProfiles: () => void;
   onOpenAdmin: () => void;
-  onOpenBloggerGuide: () => void;
   onOpenAuth: () => void;
   onOpenPayment: () => void;
   currentCategory: FormCategory;
@@ -41,7 +40,6 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenSubscription,
   onOpenProfiles,
   onOpenAdmin,
-  onOpenBloggerGuide,
   onOpenAuth,
   onOpenPayment,
   currentCategory,
@@ -130,7 +128,7 @@ export const Header: React.FC<HeaderProps> = ({
         </nav>
       )}
 
-      {/* Zone 3: Actions (Admin, Blogger, Wallet, Subscription, Demo, PDF) */}
+      {/* Zone 3: Actions (Admin, Wallet, Subscription, Demo, PDF) */}
       <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
         
         {/* MASTER ADMIN PANEL BUTTON */}
@@ -144,16 +142,13 @@ export const Header: React.FC<HeaderProps> = ({
           <span className="hidden md:inline">ॲडमीन पॅनेल</span>
         </button>
 
-        {/* Blogger / Blogspot Guide Button */}
-        <button
-          type="button"
-          onClick={onOpenBloggerGuide}
-          title="ब्लॉगस्पॉटवर कायमस्वरूपी सेटप व वेबसाईट HTML फाईल डाऊनलोड करा"
-          className="inline-flex items-center gap-1 px-2 sm:px-2.5 py-1.5 text-xs font-bold text-orange-200 bg-orange-950/80 hover:bg-orange-900 border border-orange-700/80 rounded-md transition-colors whitespace-nowrap shadow-2xs cursor-pointer"
-        >
-          <Globe className="w-3.5 h-3.5 text-orange-400" />
-          <span className="hidden sm:inline">ब्लॉगर सेटप & फाईल</span>
-        </button>
+        {/* Center License ID badge or Subscribed status */}
+        {user.centerId ? (
+          <div className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-mono font-bold text-amber-300 bg-amber-950/80 border border-amber-600/70 rounded-md">
+            <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
+            <span>ID: {user.centerId}</span>
+          </div>
+        ) : null}
 
         {/* Wallet / Pay Per Page (₹10) Button */}
         {adminSettings.payment.isPaymentSystemActive && (
