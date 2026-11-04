@@ -1,6 +1,7 @@
 import React from 'react';
 import { STFormData } from '../../types/form';
 import { AapleSarkarLogo } from './AapleSarkarLogo';
+import { WatermarkOverlay } from '../WatermarkOverlay';
 
 interface Page1Props {
   data: STFormData;
@@ -12,7 +13,17 @@ export const Page1: React.FC<Page1Props> = ({ data, onUpdate }) => {
     val?.toLowerCase().trim() === target?.toLowerCase().trim();
 
   return (
-    <div className="a4-page p-8 sm:p-10 text-[13px] leading-relaxed relative flex flex-col justify-between border border-slate-300 print:border-none print:p-0">
+    <div className="a4-page p-8 sm:p-10 text-[13px] leading-relaxed relative flex flex-col justify-between border border-slate-300 print:border-none print:p-0 overflow-hidden">
+      <WatermarkOverlay
+        text={data.watermarkText}
+        subText={data.watermarkSubText}
+        color={data.watermarkColor}
+        opacity={data.watermarkOpacity}
+        fontSize={data.watermarkFontSize}
+        rotation={data.watermarkRotation}
+        enabled={data.watermarkEnabled}
+        isRemoved={data.isWatermarkRemoved}
+      />
       <div>
         {/* Top Header Row with Page Number and Center Info */}
         <div className="flex justify-between items-start mb-2 border-b pb-2 border-slate-200">
@@ -36,10 +47,18 @@ export const Page1: React.FC<Page1Props> = ({ data, onUpdate }) => {
             </div>
           </div>
 
-          {/* Right: Aaple Sarkar Seva Kendra Logo (WITHOUT the deleted Karanjkhed line!) & Page No */}
+          {/* Right: Aaple Sarkar Seva Kendra Logo (or custom uploaded logo) & Page No */}
           <div className="flex flex-col items-end">
             <span className="font-bold text-xs mb-1">[१]</span>
-            <AapleSarkarLogo className="h-14" showSubtitle={false} />
+            {data.asskLogoOption === 'official_assk' && <AapleSarkarLogo className="h-14" showSubtitle={false} />}
+            {data.asskLogoOption === 'custom_uploaded' && data.customAsskLogoUrl && (
+              <img src={data.customAsskLogoUrl} alt="Custom Logo" className="h-14 object-contain" />
+            )}
+            {data.asskLogoOption === 'csc_logo' && (
+              <div className="text-center font-bold text-xs bg-slate-900 text-white px-2 py-1 rounded">
+                CSC DIGITAL SEVA
+              </div>
+            )}
           </div>
         </div>
 

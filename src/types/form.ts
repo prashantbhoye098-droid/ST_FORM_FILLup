@@ -1,32 +1,103 @@
 /**
- * Types for Maharashtra Scheduled Tribe (ST) Caste Certificate Application Form
- * Forms covered:
- * Page 1-3: नमुना "अ" [नियम ३ (१) पहा]
- * Page 4: नमुना "अ-१" [नियम ३ (२) पहा]
- * Page 5: नमुना ३ [नियम ४] - वंशावळ व शपथपत्र
- * Page 6: प्रपत्र -अ-ब - स्वयं घोषणापत्र
+ * Complete types for Maharashtra Seva Kendra Application Forms Suite
  */
+
+export type FormCategory =
+  | 'ST_CASTE' // अनुसूचित जमाती (ST) जात प्रमाणपत्र (६ पृष्ठे)
+  | 'OBC_SC_CASTE' // OBC / SC / VJNT / SBC जात प्रमाणपत्र (७ पृष्ठे)
+  | 'INCOME_DECLARATION' // उत्पन्नाचा दाखला - प्रपत्र-अ मिळकत स्वघोषणा
+  | 'SELF_DECLARATIONS_16'; // १६ विविध स्वयं घोषणापत्र दाखले (रहिवास, विधवा, विभक्त कुटुंब, इ.)
 
 export type YesNo = 'होय' | 'नाही';
 
-export interface VanshavalMember {
+export type ASSKLogoType = 'official_assk' | 'custom_uploaded' | 'csc_logo' | 'none';
+
+// User Account & Authentication
+export interface UserProfile {
   id: string;
-  relation: string; // e.g. 'खापर पणजोबा' | 'पणजोबा' | 'आजोबा' | 'वडील' | 'काका / चुलते' | 'अर्जदार' | 'भाऊ'
   name: string;
-  notes?: string;
-  children?: VanshavalMember[];
+  email: string;
+  photoUrl: string;
+  isLoggedIn: boolean;
+  plan: 'free' | 'monthly' | 'yearly';
+  walletBalance: number; // In Rupees (e.g. 50)
+  planExpiryDate?: string;
+}
+
+// Income Source Row for उत्पन्नाचा दाखला
+export interface IncomeSourceRow {
+  srNo: number;
+  sourceName: string;
+  year1Amount: number | string; // उदा. २०२३-२४
+  year2Amount: number | string; // उदा. २०२४-२५
+  year3Amount: number | string; // उदा. २०२५-२६
+}
+
+// 16 Self Declaration types
+export type SelfDeclarationType =
+  | 'रहिवास प्रमाणपत्र'
+  | 'विधवा असल्याचा दाखला'
+  | 'परितक्त्या असल्याचा दाखला'
+  | 'विभक्त कुटुंबाचा दाखला'
+  | 'नोकरी व्यवसायासाठी ना-हरकत प्रमाणपत्र'
+  | 'बेरोजगार प्रमाणपत्र'
+  | 'हयातीचा दाखला'
+  | 'शौचालय दाखला'
+  | 'नळ जोडणीसाठी अनुमती प्रमाणपत्र'
+  | 'चारित्र्याचा दाखला'
+  | 'विजेच्या जोडणीसाठी ना-हरकत प्रमाणपत्र'
+  | 'जिल्हा परिषद फंडातून कृषी साहित्य खरेदी'
+  | 'राष्ट्रीय बायोगॅस व खत व्यवस्थापन कार्यक्रम'
+  | 'बचत गटांना खेळते भाग भांडवल बँक मार्फत कर्ज पुरवठा'
+  | 'कोणत्याही योजनेचा लाभ न घेतल्याचे प्रमाणपत्र'
+  | 'निराधार योजनेसाठी वयाचा दाखला';
+
+// Saved Village Profile for instant auto-fill of future applicants
+export interface VillageProfile {
+  id: string;
+  profileName: string; // e.g. "अंबासन गाव प्रोफाईल"
+  village: string;
+  taluka: string;
+  district: string;
+  postOffice: string;
+  residence1950Place: string;
+  primarySchoolName: string;
+  primarySchoolVillageTalukaDist: string;
+  secondarySchoolName: string;
+  secondarySchoolVillageTalukaDist: string;
+  relativeVillages: string;
+  deityNames: string;
+  tribeName: string;
+  subTribe: string;
+  casteCategory: string;
 }
 
 export interface STFormData {
-  // Center Details (left corner option & header)
+  // Active Form Mode
+  activeFormCategory: FormCategory;
+  activeSelfDeclarationType: SelfDeclarationType;
+
+  // Center Details & Logo Options
   centerName: string;
   centerAddress: string;
-  centerLogoUrl: string; // user uploaded or empty
+  centerLogoUrl: string;
   centerContact: string;
+  asskLogoOption: ASSKLogoType; // official / custom / csc / none
+  customAsskLogoUrl: string;
 
   // Header Authority
-  subDivisionalOffice: string; // e.g. "उपविभागीय अधिकारी, बागलाण" or "बागलाण"
-  subDivisionPlace: string; // e.g. "बागलाण"
+  subDivisionalOffice: string; // e.g. "बागलाण"
+  subDivisionPlace: string;
+
+  // Watermark Settings (Default: "माऊली डिजिटल सेवा केंद्र पाथवे दिगर")
+  watermarkText: string;
+  watermarkSubText?: string;
+  watermarkColor?: string;
+  watermarkOpacity?: number;
+  watermarkFontSize?: number;
+  watermarkRotation?: number;
+  watermarkEnabled?: boolean;
+  isWatermarkRemoved: boolean; // True when paid or subscribed
 
   // 1. अर्जदाराची माहिती (Applicant Details)
   applicantName: string;
@@ -37,10 +108,11 @@ export interface STFormData {
   postOffice: string;
   gender: 'पुरुष' | 'स्त्री' | 'इतर';
   birthDate: string; // YYYY-MM-DD
-  age: number; // calculated or manual
-  applicantCurrentOccupation: string; // शिक्षण, नोकरी, शेती, मजुरी, इतर
+  age: number;
+  aadhaarNumber?: string;
+  applicantCurrentOccupation: string;
   applicantCurrentOccupationOther?: string;
-  applicantTraditionalOccupation: string; // शेती, मजुरी, इतर
+  applicantTraditionalOccupation: string;
   applicantTraditionalOccupationOther?: string;
 
   // 2. वडिलांची माहिती (Father Details)
@@ -53,96 +125,99 @@ export interface STFormData {
   fatherTraditionalOccupation: string;
   fatherTraditionalOccupationOther?: string;
 
-  // 3. जात व भाषा (Tribe & Language)
-  tribeName: string; // e.g. "कोकणा", "कोकणी", "भिल्ल", "महादेव कोळी", "वारली", etc.
-  subTribe: string; // पोट-जमात
-  motherTongue: string; // मराठी, हिंदी, इंग्लिश, कोकणी
+  // 3. जात व भाषा (Tribe & Caste)
+  casteCategory: 'अनुसूचित जमाती (ST)' | 'इतर मागासवर्ग (OBC)' | 'अनुसूचित जाती (SC)' | 'विमुक्त जाती (VJ)' | 'भटक्या जमाती (NT)' | 'विशेष मागासप्रवर्ग (SBC)';
+  tribeName: string;
+  subTribe: string;
+  motherTongue: string;
   motherTongueOther?: string;
-  spokenDialect: string; // मराठी, हिंदी, इंग्लिश, कोकणी, डांगी, अहिराणी, भिल्ली
+  spokenDialect: string;
   spokenDialectOther?: string;
 
-  // 4. प्रमाणपत्राची आवश्यकता असलेल्या व्यक्तीबाबत माहिती
-  originalVillage: string; // मूळ गाव
-  originalTaluka: string; // मूळ तालुका
-  originalDistrict: string; // मूळ जिल्हा
-  residence1950Place: string; // ६ सप्टेंबर १९५० पूर्वीचे वास्तव्याचे ठिकाण
-  
-  // Page 2: 4(ब) - (ह)
+  // 4. मूळ गाव व स्थलांतर
+  originalVillage: string;
+  originalTaluka: string;
+  originalDistrict: string;
+  residence1950Place: string;
   livingInOtherVillage: boolean;
   otherVillageName: string;
   yearLeftOriginalVillage: string;
-  reasonLeftOriginalVillage: string; // शिक्षण / नोकरी / इतर
-  reasonLivingCurrentVillage: string; // शिक्षण / नोकरी / इतर
-  birthPlace: string; // जन्म ठिकाण (गाव, तालुका, जिल्हा)
+  reasonLeftOriginalVillage: string;
+  reasonLivingCurrentVillage: string;
+  birthPlace: string;
 
-  // शिक्षण माहिती (Education)
-  primarySchoolName: string; // प्राथमिक शाळेचे नाव
-  primarySchoolVillageTalukaDist: string; // गाव, तहसील व जिल्हा
-  secondarySchoolName: string; // माध्यमिक शाळा / महाविद्यालयाचे नाव
-  secondarySchoolVillageTalukaDist: string; // गाव, तहसील व जिल्हा
+  // शिक्षण माहिती
+  primarySchoolName: string;
+  primarySchoolVillageTalukaDist: string;
+  secondarySchoolName: string;
+  secondarySchoolVillageTalukaDist: string;
 
-  // 5. पुष्ट्यर्थ पुरावा (Evidence Yes/No)
-  proofBirthRegister: YesNo; // ५(अ)(१) जन्म नोंदवही उतारा
-  proofSchoolAdmissionRegister: YesNo; // ५(अ)(२) प्राथमिक शाळा प्रवेश नोंदवही उतारा
-  proofSchoolLeavingCert: YesNo; // ५(अ)(३) प्राथमिक शाळा सोडल्याचा दाखला
-  proof1950Residence: YesNo; // ५(ब) १९५० पूर्वीचा पुरावा
-  proofServiceBookRecord: YesNo; // ५(क) शासकीय सेवेतील सेवा पुस्तकातील उतारा
-  proofScrutinyValidityCert: YesNo; // ५(ड) जात छाननी समितीकडून दिलेले वैधता प्रमाणपत्र
-  proofRevenueGramPanchayatRecord: YesNo; // ५(ई) महसुली किंवा ग्रामपंचायतीतील अभिलेख
-  proofOtherWrittenEvidence: YesNo; // ५(फ) इतर संबंधित लेखी पुरावा
+  // पुरावे
+  proofBirthRegister: YesNo;
+  proofSchoolAdmissionRegister: YesNo;
+  proofSchoolLeavingCert: YesNo;
+  proof1950Residence: YesNo;
+  proofServiceBookRecord: YesNo;
+  proofScrutinyValidityCert: YesNo;
+  proofRevenueGramPanchayatRecord: YesNo;
+  proofOtherWrittenEvidence: YesNo;
 
-  // Page 3: 6. इतर माहिती
-  relativeVillages: string; // नातेवाईक राहत असलेल्या ५ गावांची नावे
-  deityNames: string; // कुलदैवत / देवदेवतांची नावे
-  convertedDeityNames: string; // धर्मांतरापूर्वी पूजा करीत असलेल्या देवदेवतांची नावे
-
-  // 7 - 10
-  fatherAncestorOriginalVillage: string; // वडिलांचे / आजोबांचे मूळ गाव, तहसील व जिल्हा
-  hasOriginalVillageProof: YesNo; // ८. मूळ गावासंबंधीचा पुरावा
-  hasGovtBenefitsOrCert: YesNo; // ९(अ) प्रमाणपत्र किंवा शासकीय सवलती घेतल्या आहेत काय
-  affidavitFormA1Attached: YesNo; // ९(ब) नमुना अ-१ मधील शपथपत्र जोडले आहे काय
-  hasPreviousApplication: YesNo; // १०(अ) पूर्वी सक्षम प्राधिकाऱ्याकडे अर्ज केला आहे काय
+  // इतर माहिती (पृष्ठ ३)
+  relativeVillages: string;
+  deityNames: string;
+  convertedDeityNames: string;
+  fatherAncestorOriginalVillage: string;
+  hasOriginalVillageProof: YesNo;
+  hasGovtBenefitsOrCert: YesNo;
+  affidavitFormA1Attached: YesNo;
+  hasPreviousApplication: YesNo;
   previousApplicationDetails?: string;
-  hasRelativeValidityCert: YesNo; // १०(ब) नातेवाईकांचे वैधता प्रमाणपत्र दिले आहे काय
+  hasRelativeValidityCert: YesNo;
   relativeValidityDetails?: string;
 
-  // Page 3 footer
-  declarationPlace: string; // ठिकाण (e.g. बागलाण, सटाणा, नाशिक)
-  customDate?: string; // If empty, today's date formatted automatically
+  // ठिकाण व दिनांक
+  declarationPlace: string;
+  customDate?: string;
   isAutoDateEnabled: boolean;
 
-  // Page 4: नमुना अ-१ शपथपत्र
-  applicantReligion: string; // default "हिंदू"
-  hasAppliedOtherState: YesNo; // मी महाराष्ट्र राज्यात किंवा इतर राज्यात अर्ज केलेला आहे / नाही
-  hasReceivedOtherStateCert: YesNo; // मला प्रमाणपत्र देण्यात आलेले आहे / नाही
-  relativeWithValidityName: string; // ज्या नातेवाईकाला वैधता प्रमाणपत्र मिळाले त्यांचे नाव
-  relativeWithValidityRelation: string; // नाते (उदा. चुलते, भाऊ, वडील)
+  // नमुना अ-१ व २ शपथपत्र
+  applicantReligion: string;
+  hasAppliedOtherState: YesNo;
+  hasReceivedOtherStateCert: YesNo;
+  relativeWithValidityName: string;
+  relativeWithValidityRelation: string;
 
-  // Page 5: वंशावळ व नाव बदल
-  nameDiscrepancyPerson: string; // 'माझे' | 'वडिलांच्या' | 'आजोबांच्या'
-  oldNameOnLC: string; // शाळा सोडल्याच्या दाखल्यावरील जुने नाव
-  newNameOfficial: string; // नवीन / बरोबर नाव
-
-  // वंशावळ नोंदी (Tree Nodes)
+  // वंशावळ व नाव बदल
+  nameDiscrepancyPerson: string;
+  oldNameOnLC: string;
+  newNameOfficial: string;
   vanshaval: {
-    greatGreatGrandfather: string; // खापर पणजोबा
-    greatGrandfather: string; // पणजोबा
-    grandfather: string; // आजोबा
-    father: string; // वडील
-    uncles: string[]; // काका / चुलते
-    applicant: string; // अर्जदार (auto synced with applicantName)
-    siblings: string[]; // भाऊ / बहीण
-    cousins: string[]; // चुलत भाऊ
+    greatGreatGrandfather: string;
+    greatGrandfather: string;
+    grandfather: string;
+    father: string;
+    uncles: string[];
+    applicant: string;
+    siblings: string[];
+    cousins: string[];
   };
 
-  // साक्षीदार (Witness for Page 4 & 5)
+  // साक्षीदार
   witnessName: string;
   witnessAddress?: string;
   witnessSignatureUrl: string;
 
-  // स्वाक्षरी व फोटो (Uploads)
-  applicantPhotoUrl: string; // Shown on Page 1 AND Page 6
+  // स्वाक्षरी व फोटो
+  applicantPhotoUrl: string;
   applicantSignatureUrl: string;
-  fatherSignatureUrl: string; // Used if age < 18
-  fatherNameAsGuardian: string; // Auto-synced with father's name
+  fatherSignatureUrl: string;
+  fatherNameAsGuardian: string;
+
+  // प्रपत्र-अ (उत्पन्नाचा दाखला तपशील)
+  incomeFamilyMembersCount: number | string;
+  incomeLandHectare: string; // हे.आर. जमीन
+  hasLand: boolean;
+  incomeYears: [string, string, string]; // उदा. ['२०२३', '२०२४', '२०२५']
+  incomeRows: IncomeSourceRow[];
+  incomePurpose: string; // उदा. 'शैक्षणिक/शासकीय/प्रकरण कामी'
 }

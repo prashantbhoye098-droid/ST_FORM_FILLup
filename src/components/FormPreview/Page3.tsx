@@ -1,6 +1,7 @@
 import React from 'react';
 import { STFormData, YesNo } from '../../types/form';
 import { getTodayFormatted } from '../../constants/initialData';
+import { WatermarkOverlay } from '../WatermarkOverlay';
 
 interface Page3Props {
   data: STFormData;
@@ -56,7 +57,17 @@ export const Page3: React.FC<Page3Props> = ({ data, onUpdate }) => {
   };
 
   return (
-    <div className="a4-page p-8 sm:p-10 text-[13px] leading-relaxed relative flex flex-col justify-between border border-slate-300 print:border-none print:p-0">
+    <div className="a4-page p-8 sm:p-10 text-[13px] leading-relaxed relative flex flex-col justify-between border border-slate-300 print:border-none print:p-0 overflow-hidden">
+      <WatermarkOverlay
+        text={data.watermarkText}
+        subText={data.watermarkSubText}
+        color={data.watermarkColor}
+        opacity={data.watermarkOpacity}
+        fontSize={data.watermarkFontSize}
+        rotation={data.watermarkRotation}
+        enabled={data.watermarkEnabled}
+        isRemoved={data.isWatermarkRemoved}
+      />
       <div>
         {/* Top Header Row with Page Number */}
         <div className="flex justify-end items-center mb-3">

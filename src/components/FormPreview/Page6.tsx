@@ -1,6 +1,7 @@
 import React from 'react';
 import { STFormData } from '../../types/form';
 import { getTodayFormatted } from '../../constants/initialData';
+import { WatermarkOverlay } from '../WatermarkOverlay';
 
 interface Page6Props {
   data: STFormData;
@@ -21,7 +22,17 @@ export const Page6: React.FC<Page6Props> = ({ data }) => {
   const relationWord = data.gender === 'स्त्री' ? 'मुलगी' : 'मुलगा';
 
   return (
-    <div className="a4-page p-8 sm:p-10 text-[13px] leading-relaxed relative flex flex-col justify-between border border-slate-300 print:border-none print:p-0">
+    <div className="a4-page p-8 sm:p-10 text-[13px] leading-relaxed relative flex flex-col justify-between border border-slate-300 print:border-none print:p-0 overflow-hidden">
+      <WatermarkOverlay
+        text={data.watermarkText}
+        subText={data.watermarkSubText}
+        color={data.watermarkColor}
+        opacity={data.watermarkOpacity}
+        fontSize={data.watermarkFontSize}
+        rotation={data.watermarkRotation}
+        enabled={data.watermarkEnabled}
+        isRemoved={data.isWatermarkRemoved}
+      />
       <div>
         {/* Top Header Row with Page Number */}
         <div className="flex justify-end items-center mb-4">
