@@ -23,6 +23,7 @@ export interface SubscribedCenter {
 
 export interface AdminSettings {
   // Authentication
+  adminId: string; // Master admin login ID (default: 'admin')
   adminPassword: string; // Master admin password (default: 'mauli@2024')
 
   // Watermark Settings
@@ -66,8 +67,9 @@ export interface AdminSettings {
   // Branding & Header
   branding: {
     portalTitle: string; // e.g. 'आपले सरकार सेवा केंद्र'
-    portalTagline: string; // e.g. 'पोर्टल २०२४ - डिजिटल शासकीय फॉर्म्स व वंशावळ जनरेटर'
+    portalTagline: string; // e.g. 'डिजिटल शासकीय फॉर्म्स व वंशावळ जनरेटर'
     headerBadgeText: string; // e.g. 'पोर्टल २०२४'
+    headerLogoText: string; // e.g. 'महा'
     centerName: string;
     centerAddress: string;
     centerContact: string;
@@ -75,6 +77,17 @@ export interface AdminSettings {
     centerLogoUrl: string;
     asskLogoOption: 'official_assk' | 'custom_uploaded' | 'csc_logo' | 'none';
     customAsskLogoUrl: string;
+  };
+
+  // Header Buttons On/Off Toggles
+  headerButtons: {
+    showDemoButton: boolean;
+    showResetButton: boolean;
+    showProfilesButton: boolean;
+    showWalletButton: boolean;
+    showAuthButton: boolean;
+    showPageNavigation: boolean;
+    showFormSelector: boolean;
   };
 
   // Top Announcement Banner
@@ -119,6 +132,7 @@ export interface AdminSettings {
 }
 
 export const DEFAULT_ADMIN_SETTINGS: AdminSettings = {
+  adminId: 'admin',
   adminPassword: 'mauli@2024',
 
   watermark: {
@@ -134,12 +148,12 @@ export const DEFAULT_ADMIN_SETTINGS: AdminSettings = {
 
   payment: {
     isPaymentSystemActive: true,
-    enforcePaidLogin: true, // 100% Paid Gatekeeper enabled by default!
+    enforcePaidLogin: false, // Turned OFF as requested: anyone can fill any form freely!
     autoApproveNewRegistrations: true,
     isPayPerPageActive: true,
     perPageFee: 10,
-    isWalletActive: true,
-    isSubscriptionActive: true,
+    isWalletActive: false,
+    isSubscriptionActive: false, // Turned OFF as requested
     monthlyPlanPrice: 199,
     quarterlyPlanPrice: 499,
     yearlyPlanPrice: 1499,
@@ -147,19 +161,20 @@ export const DEFAULT_ADMIN_SETTINGS: AdminSettings = {
     upiId: 'prashantbhoye098@oksbi',
     payeeName: 'माऊली डिजिटल सेवा केंद्र पाथवे दिगर',
     customQrCodeUrl: '',
-    allowFreeWatermarkedPrint: false
+    allowFreeWatermarkedPrint: false // Must pay before print to remove watermark!
   },
 
   antiCopy: {
     disableRightClick: true,
     disableInspectShortcuts: true,
-    disableTextSelection: true
+    disableTextSelection: false
   },
 
   branding: {
     portalTitle: 'आपले सरकार सेवा केंद्र',
     portalTagline: 'डिजिटल शासकीय फॉर्म्स व वंशावळ जनरेटर',
     headerBadgeText: 'पोर्टल २०२४',
+    headerLogoText: 'महा',
     centerName: 'आपले सरकार सेवा केंद्र',
     centerAddress: 'ता. बागलाण, जि. नाशिक',
     centerContact: '९८२२xxxxxx',
@@ -167,6 +182,16 @@ export const DEFAULT_ADMIN_SETTINGS: AdminSettings = {
     centerLogoUrl: '',
     asskLogoOption: 'official_assk',
     customAsskLogoUrl: ''
+  },
+
+  headerButtons: {
+    showDemoButton: true,
+    showResetButton: true,
+    showProfilesButton: true,
+    showWalletButton: false,
+    showAuthButton: false,
+    showPageNavigation: true,
+    showFormSelector: true
   },
 
   announcement: {

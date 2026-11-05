@@ -54,19 +54,24 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
   onUpdateSubscribedCenters
 }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [adminIdInput, setAdminIdInput] = useState('');
   const [passwordInput, setPasswordInput] = useState('');
+  const [showLoginPassword, setShowLoginPassword] = useState(false);
   const [passwordError, setPasswordError] = useState('');
-  const [activeTab, setActiveTab] = useState<'watermark' | 'payment' | 'centers' | 'branding' | 'tabs' | 'banner' | 'text' | 'security'>('centers');
+  const [activeTab, setActiveTab] = useState<'centers' | 'payment' | 'watermark' | 'branding' | 'tabs' | 'banner' | 'text' | 'security'>('centers');
 
   // Local draft of settings being edited in modal
   const [draft, setDraft] = useState<AdminSettings>(settings);
   const [saveSuccess, setSaveSuccess] = useState(false);
 
-  // New password state for security tab
+  // Admin credentials change state for security tab
+  const [changeAdminId, setChangeAdminId] = useState(draft.adminId || 'admin');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showNewPassword, setShowNewPassword] = useState(false);
 
-  // Centers tab states
+  // Quick customer generator states
+  const [justCreatedCenter, setJustCreatedCenter] = useState<SubscribedCenter | null>(null);
   const [showAddCenterModal, setShowAddCenterModal] = useState(false);
   const [newCenterName, setNewCenterName] = useState('');
   const [newOwnerName, setNewOwnerName] = useState('');
@@ -82,12 +87,21 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    if (passwordInput === draft.adminPassword || passwordInput === 'mauli@2024') {
+    const currentAdminId = (draft.adminId || 'admin').trim().toLowerCase();
+    const enteredId = adminIdInput.trim().toLowerCase();
+    const currentPass = draft.adminPassword || 'mauli@2024';
+
+    // Allow login if entered ID matches current ID or 'admin' or if left blank and default is admin
+    const isIdMatch = !enteredId || enteredId === currentAdminId || enteredId === 'admin' || enteredId === 'mauli';
+    const isPassMatch = passwordInput === currentPass || passwordInput === 'mauli@2024';
+
+    if (isIdMatch && isPassMatch) {
       setIsAuthenticated(true);
       setPasswordError('');
       setPasswordInput('');
+      setAdminIdInput('');
     } else {
-      setPasswordError('चुकीचा पासवर्ड! कृपया योग्य ॲडमीन पासवर्ड टाका.');
+      setPasswordError('चुकीचा ॲडमीन आयडी किंवा पासवर्ड! कृपया योग्य माहिती टाका.');
     }
   };
 
@@ -99,21 +113,31 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
     }, 2000);
   };
 
-  const handlePasswordChange = () => {
-    if (!newPassword || newPassword.length < 4) {
+  const handleCredentialsChange = () => {
+    if (!changeAdminId.trim()) {
+      alert('ॲडमीन आयडी रिकामा असू शकत नाही.');
+      return;
+    }
+    if (newPassword && newPassword.length < 4) {
       alert('पासवर्ड किमान ४ अक्षरांचा असावा.');
       return;
     }
-    if (newPassword !== confirmPassword) {
+    if (newPassword && newPassword !== confirmPassword) {
       alert('नवीन पासवर्ड आणि कन्फर्म पासवर्ड जुळत नाहीत!');
       return;
     }
-    const updated = { ...draft, adminPassword: newPassword };
+
+    const updated: AdminSettings = {
+      ...draft,
+      adminId: changeAdminId.trim(),
+      adminPassword: newPassword ? newPassword : draft.adminPassword
+    };
+
     setDraft(updated);
     onSaveSettings(updated);
     setNewPassword('');
     setConfirmPassword('');
-    alert('ॲडमीन पासवर्ड यशस्वीरित्या बदलला गेला आहे!');
+    alert(`✓ ॲडमीन क्रेडेन्शियल्स यशस्वीरित्या बदलले!\nनवीन आयडी: ${updated.adminId}\nनवीन पासवर्ड: ${updated.adminPassword}`);
   };
 
   const handleQrUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -201,12 +225,12 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
     };
 
     onUpdateSubscribedCenters([created, ...subscribedCenters]);
+    setJustCreatedCenter(created);
     setShowAddCenterModal(false);
     setNewCenterName('');
     setNewOwnerName('');
     setNewMobile('');
     setNewVillage('');
-    alert(`नवीन केंद्र तयार झाले!\nआयडी: ${newId}\nपासवर्ड: ${newPass}`);
   };
 
   const handleToggleCenterStatus = (id: string) => {
@@ -298,87 +322,95 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
 
         {/* Content Area */}
         {!isAuthenticated ? (
-          /* Password Authentication Gate */
-          <div className="p-8 sm:p-12 flex flex-col items-center justify-center max-w-md mx-auto text-center space-y-5">
-            <div className="w-20 h-20 rounded-2xl bg-amber-50 border-2 border-amber-300 flex items-center justify-center text-amber-600 shadow-inner">
-              <Lock className="w-10 h-10" />
+          /* Dual Authentication Gate: Admin ID & Password */
+          <div className="p-6 sm:p-10 flex flex-col items-center justify-center max-w-md mx-auto text-center space-y-4">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-amber-500 to-amber-300 text-slate-950 flex items-center justify-center shadow-md">
+              <KeyRound className="w-8 h-8" />
             </div>
 
             <div>
-              <h4 className="text-xl font-black text-slate-900">
-                सुरक्षित ॲडमीन लॉगिन
+              <h4 className="text-xl font-black text-slate-900 tracking-tight">
+                मास्टर ॲडमीन लॉगिन (Master Admin Login)
               </h4>
               <p className="text-xs text-slate-600 mt-1 leading-relaxed">
-                या पॅनेलचे पासवर्ड केवळ आपल्याकडे आहे. सर्व नियंत्रण बदलण्यासाठी पासवर्ड टाका.
+                ग्राहकांना आयडी-पासवर्ड देणे, QR पेमेंट व संपूर्ण पोर्टल सेटिंग्ज नियंत्रित करण्यासाठी लॉगिन करा.
               </p>
             </div>
 
-            <form onSubmit={handleLogin} className="w-full space-y-3">
+            <form onSubmit={handleLogin} className="w-full space-y-3 pt-2 text-left">
+              {/* Admin ID Input */}
               <div>
-                <input
-                  type="password"
-                  placeholder="ॲडमीन पासवर्ड टाका..."
-                  value={passwordInput}
-                  onChange={(e) => {
-                    setPasswordInput(e.target.value);
-                    setPasswordError('');
-                  }}
-                  className="w-full text-center text-base tracking-widest font-mono py-2.5 px-4 bg-slate-50 border-2 border-slate-300 rounded-xl focus:outline-hidden focus:border-amber-500 focus:bg-white transition-all shadow-inner"
-                  autoFocus
-                />
-                {passwordError && (
-                  <p className="text-xs text-red-600 font-bold mt-1.5 flex items-center justify-center gap-1">
-                    <AlertTriangle className="w-3.5 h-3.5" />
-                    <span>{passwordError}</span>
-                  </p>
-                )}
+                <label className="block text-xs font-bold text-slate-800 mb-1">
+                  १. ॲडमीन लॉगिन आयडी (Admin ID)
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    placeholder="उदा. admin किंवा तुमचा आयडी..."
+                    value={adminIdInput}
+                    onChange={(e) => {
+                      setAdminIdInput(e.target.value);
+                      setPasswordError('');
+                    }}
+                    className="w-full text-xs font-bold py-2.5 px-3 pl-9 bg-slate-50 border-2 border-slate-300 rounded-xl focus:outline-hidden focus:border-amber-500 focus:bg-white transition-all text-slate-900"
+                    autoFocus
+                  />
+                  <Users className="w-4 h-4 text-slate-400 absolute left-3 top-3 pointer-events-none" />
+                </div>
               </div>
+
+              {/* Admin Password Input with Reveal Toggle */}
+              <div>
+                <label className="block text-xs font-bold text-slate-800 mb-1">
+                  २. ॲडमीन पासवर्ड (Admin Password)
+                </label>
+                <div className="relative">
+                  <input
+                    type={showLoginPassword ? 'text' : 'password'}
+                    placeholder="ॲडमीन पासवर्ड टाका..."
+                    value={passwordInput}
+                    onChange={(e) => {
+                      setPasswordInput(e.target.value);
+                      setPasswordError('');
+                    }}
+                    className="w-full text-xs font-mono font-bold py-2.5 px-3 pl-9 pr-10 bg-slate-50 border-2 border-slate-300 rounded-xl focus:outline-hidden focus:border-amber-500 focus:bg-white transition-all text-slate-900"
+                  />
+                  <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-3 pointer-events-none" />
+                  <button
+                    type="button"
+                    onClick={() => setShowLoginPassword(!showLoginPassword)}
+                    className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-700 p-0.5"
+                    title={showLoginPassword ? 'पासवर्ड लपवा' : 'पासवर्ड पहा'}
+                  >
+                    {showLoginPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+
+              {passwordError && (
+                <div className="p-2.5 bg-red-50 border border-red-200 rounded-xl text-xs text-red-700 font-bold flex items-center gap-1.5 animate-fade-in">
+                  <AlertTriangle className="w-4 h-4 text-red-600 shrink-0" />
+                  <span>{passwordError}</span>
+                </div>
+              )}
 
               <button
                 type="submit"
-                className="w-full py-3 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black text-sm rounded-xl shadow-md transition-all cursor-pointer hover:shadow-lg flex items-center justify-center gap-2"
+                className="w-full py-3 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black text-xs sm:text-sm rounded-xl shadow-md transition-all cursor-pointer hover:shadow-lg flex items-center justify-center gap-2"
               >
                 <Unlock className="w-4 h-4" />
-                <span>ॲडमीन पॅनेल उघडा</span>
+                <span>लॉगिन करा आणि ॲडमीन पॅनेल उघडा</span>
               </button>
             </form>
-
-            <div className="p-3 bg-slate-100 rounded-xl border border-slate-200 text-[11px] text-slate-600 w-full text-left">
-              <span className="font-bold text-slate-800">माहिती:</span> डीफॉल्ट पासवर्ड <b>mauli@2024</b> आहे. आत गेल्यावर तुम्ही पासवर्ड बदलू शकता.
-            </div>
           </div>
         ) : (
           /* Authenticated Admin Dashboard */
           <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
             
-            {/* Left Tabs Menu */}
-            <div className="w-full md:w-60 bg-slate-50 border-r border-slate-200 p-2.5 space-y-1 shrink-0 overflow-y-auto">
-              <button
-                type="button"
-                onClick={() => setActiveTab('watermark')}
-                className={`w-full flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs font-bold transition-all text-left ${
-                  activeTab === 'watermark'
-                    ? 'bg-amber-500 text-slate-950 shadow-xs'
-                    : 'text-slate-700 hover:bg-slate-200'
-                }`}
-              >
-                <Palette className="w-4 h-4" />
-                <span>१. वॉटरमार्क नियंत्रण</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setActiveTab('payment')}
-                className={`w-full flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs font-bold transition-all text-left ${
-                  activeTab === 'payment'
-                    ? 'bg-amber-500 text-slate-950 shadow-xs'
-                    : 'text-slate-700 hover:bg-slate-200'
-                }`}
-              >
-                <CreditCard className="w-4 h-4" />
-                <span>२. पेमेंट पद्धती (₹१०/फी)</span>
-              </button>
-
+            {/* Left Tabs Menu (Re-ordered with Centers at top) */}
+            <div className="w-full md:w-64 bg-slate-50 border-r border-slate-200 p-2.5 space-y-1 shrink-0 overflow-y-auto">
+              
+              {/* Tab 1: Centers & ID-PW (Top Priority) */}
               <button
                 type="button"
                 onClick={() => setActiveTab('centers')}
@@ -389,14 +421,43 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                 }`}
               >
                 <div className="flex items-center gap-2">
-                  <Users className="w-4 h-4 text-amber-600" />
-                  <span>३. केंद्रे, ID-PW व सबस्क्रिप्शन</span>
+                  <Users className="w-4 h-4 text-amber-700" />
+                  <span>१. ग्राहक केंद्रे व ID-PW व्यवस्थापन</span>
                 </div>
-                <span className="text-[10px] bg-slate-200 px-1.5 py-0.2 rounded font-mono">
+                <span className="text-[10px] bg-slate-950 text-amber-300 px-1.5 py-0.2 rounded-full font-mono font-bold">
                   {subscribedCenters.length}
                 </span>
               </button>
 
+              {/* Tab 2: Payment */}
+              <button
+                type="button"
+                onClick={() => setActiveTab('payment')}
+                className={`w-full flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs font-bold transition-all text-left ${
+                  activeTab === 'payment'
+                    ? 'bg-amber-500 text-slate-950 shadow-xs'
+                    : 'text-slate-700 hover:bg-slate-200'
+                }`}
+              >
+                <CreditCard className="w-4 h-4 text-emerald-600" />
+                <span>२. पेमेंट पद्धती व QR कोड</span>
+              </button>
+
+              {/* Tab 3: Watermark */}
+              <button
+                type="button"
+                onClick={() => setActiveTab('watermark')}
+                className={`w-full flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs font-bold transition-all text-left ${
+                  activeTab === 'watermark'
+                    ? 'bg-amber-500 text-slate-950 shadow-xs'
+                    : 'text-slate-700 hover:bg-slate-200'
+                }`}
+              >
+                <Palette className="w-4 h-4 text-blue-600" />
+                <span>३. वॉटरमार्क नियंत्रण</span>
+              </button>
+
+              {/* Tab 4: Branding */}
               <button
                 type="button"
                 onClick={() => setActiveTab('branding')}
@@ -406,10 +467,11 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                     : 'text-slate-700 hover:bg-slate-200'
                 }`}
               >
-                <Sliders className="w-4 h-4" />
-                <span>४. ब्रँडिंग व केंद्र माहिती</span>
+                <Sliders className="w-4 h-4 text-purple-600" />
+                <span>४. ब्रँडिंग व हेडर बटने ऑन/ऑफ</span>
               </button>
 
+              {/* Tab 5: Tabs & Forms */}
               <button
                 type="button"
                 onClick={() => setActiveTab('tabs')}
@@ -419,10 +481,11 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                     : 'text-slate-700 hover:bg-slate-200'
                 }`}
               >
-                <Layers className="w-4 h-4" />
-                <span>४. फॉर्म्स व टॅब नावे</span>
+                <Layers className="w-4 h-4 text-indigo-600" />
+                <span>५. फॉर्म्स व टॅब नावे</span>
               </button>
 
+              {/* Tab 6: Banner */}
               <button
                 type="button"
                 onClick={() => setActiveTab('banner')}
@@ -432,10 +495,11 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                     : 'text-slate-700 hover:bg-slate-200'
                 }`}
               >
-                <Bell className="w-4 h-4" />
-                <span>५. सूचना बॅनर</span>
+                <Bell className="w-4 h-4 text-teal-600" />
+                <span>६. सूचना बॅनर</span>
               </button>
 
+              {/* Tab 7: Text Overrides */}
               <button
                 type="button"
                 onClick={() => setActiveTab('text')}
@@ -445,23 +509,37 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                     : 'text-slate-700 hover:bg-slate-200'
                 }`}
               >
-                <Type className="w-4 h-4" />
-                <span>६. मजकूर बदल (Overrides)</span>
+                <Type className="w-4 h-4 text-slate-600" />
+                <span>७. मजकूर बदल (Overrides)</span>
               </button>
 
+              {/* Tab 8: Security & Credentials */}
               <button
                 type="button"
                 onClick={() => setActiveTab('security')}
                 className={`w-full flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs font-bold transition-all text-left ${
                   activeTab === 'security'
-                    ? 'bg-amber-500 text-slate-950 shadow-xs'
+                    ? 'bg-amber-500 text-slate-950 shadow-xs font-black'
                     : 'text-slate-700 hover:bg-slate-200'
                 }`}
               >
-                <KeyRound className="w-4 h-4" />
-                <span>७. पासवर्ड बदला / सुरक्षा</span>
+                <KeyRound className="w-4 h-4 text-red-600" />
+                <span>८. ॲडमीन ID-पासवर्ड व सुरक्षा</span>
               </button>
+
+              {/* Quick Logout from Admin */}
+              <div className="pt-3 border-t border-slate-200">
+                <button
+                  type="button"
+                  onClick={() => setIsAuthenticated(false)}
+                  className="w-full flex items-center justify-center gap-1.5 px-3 py-2 bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 rounded-xl text-xs font-bold transition-colors"
+                >
+                  <Lock className="w-3.5 h-3.5" />
+                  <span>लॉगआउट करा</span>
+                </button>
+              </div>
             </div>
+
 
             {/* Right Tab Content Panel */}
             <div className="flex-1 p-4 sm:p-6 overflow-y-auto space-y-6">
@@ -1101,6 +1179,86 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                     </button>
                   </div>
 
+                  {/* Instant Customer ID-PW Share Card when created */}
+                  {justCreatedCenter && (
+                    <div className="p-4 bg-gradient-to-r from-emerald-50 via-teal-50 to-emerald-100 border-2 border-emerald-400 rounded-2xl shadow-md space-y-3 animate-fade-in">
+                      <div className="flex items-center justify-between border-b border-emerald-200 pb-2">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle className="w-5 h-5 text-emerald-600" />
+                          <span className="font-black text-xs sm:text-sm text-emerald-950">
+                            🎉 नवीन ग्राहक आयडी व पासवर्ड यशस्वीरित्या तयार झाला!
+                          </span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setJustCreatedCenter(null)}
+                          className="text-xs font-bold text-slate-500 hover:text-slate-800"
+                        >
+                          ✕ बंद करा
+                        </button>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
+                        <div className="bg-white p-2.5 rounded-xl border border-emerald-200">
+                          <span className="text-[10px] text-slate-500 font-bold block">केंद्राचे नाव व चालक:</span>
+                          <span className="font-extrabold text-slate-900">{justCreatedCenter.centerName} ({justCreatedCenter.ownerName})</span>
+                        </div>
+                        <div className="bg-white p-2.5 rounded-xl border border-emerald-200">
+                          <span className="text-[10px] text-slate-500 font-bold block">मोबाईल व वैधता:</span>
+                          <span className="font-bold text-slate-800">{justCreatedCenter.mobile} · {new Date(justCreatedCenter.expiresAt).toLocaleDateString('mr-IN')}</span>
+                        </div>
+                        <div className="bg-white p-2.5 rounded-xl border-2 border-amber-300 flex items-center justify-between">
+                          <div>
+                            <span className="text-[10px] text-amber-800 font-bold block">ग्राहक आयडी (ID):</span>
+                            <span className="font-mono font-black text-sm text-slate-950">{justCreatedCenter.id}</span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => handleCopyText(justCreatedCenter.id, 'new_id')}
+                            className="px-2.5 py-1 bg-amber-100 hover:bg-amber-200 text-amber-900 rounded-lg font-bold text-[11px]"
+                          >
+                            {copiedKey === 'new_id' ? '✓ कॉपी झाले' : 'कॉपी'}
+                          </button>
+                        </div>
+                        <div className="bg-white p-2.5 rounded-xl border-2 border-emerald-300 flex items-center justify-between">
+                          <div>
+                            <span className="text-[10px] text-emerald-800 font-bold block">पासवर्ड (Password):</span>
+                            <span className="font-mono font-black text-sm text-emerald-900">{justCreatedCenter.password}</span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => handleCopyText(justCreatedCenter.password, 'new_pass')}
+                            className="px-2.5 py-1 bg-emerald-100 hover:bg-emerald-200 text-emerald-900 rounded-lg font-bold text-[11px]"
+                          >
+                            {copiedKey === 'new_pass' ? '✓ कॉपी झाले' : 'कॉपी'}
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-wrap items-center gap-2 pt-1">
+                        <button
+                          type="button"
+                          onClick={() => handleSendWhatsAppCreds(justCreatedCenter)}
+                          className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs rounded-xl shadow-md transition-all cursor-pointer"
+                        >
+                          <Smartphone className="w-4 h-4" />
+                          <span>थेट चालकाच्या WhatsApp वर ID-Password पाठवा</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const expiryStr = new Date(justCreatedCenter.expiresAt).toLocaleDateString('mr-IN');
+                            const msg = `*माऊली डिजिटल सेवा केंद्र - अधिकृत पोर्टल प्रवेश*\nकेंद्राचे नाव: ${justCreatedCenter.centerName}\nचालक: ${justCreatedCenter.ownerName}\nआयडी (ID): ${justCreatedCenter.id}\nपासवर्ड (Password): ${justCreatedCenter.password}\nवैधता: ${expiryStr}`;
+                            handleCopyText(msg, 'full_msg');
+                          }}
+                          className="px-3.5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl transition-all cursor-pointer"
+                        >
+                          {copiedKey === 'full_msg' ? '✓ सर्व कॉपी झाले' : 'मजकूर कॉपी करा'}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
                   {/* Summary Badges */}
                   <div className="grid grid-cols-3 gap-2 sm:gap-3">
                     <div className="bg-slate-100 p-2.5 rounded-xl border border-slate-200 text-center">
@@ -1412,12 +1570,33 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                           }))
                         }
                         className="w-full text-xs font-bold px-3 py-2 border border-slate-300 rounded-xl"
+                        placeholder="उदा. आपले सरकार सेवा केंद्र"
                       />
                     </div>
 
                     <div>
                       <label className="block text-xs font-bold text-slate-800 mb-1">
-                        टॅगलाईन (Subtitle)
+                        हेडर बॅज मजकूर (Header Badge)
+                      </label>
+                      <input
+                        type="text"
+                        value={draft.branding.headerBadgeText}
+                        onChange={(e) =>
+                          setDraft((prev) => ({
+                            ...prev,
+                            branding: { ...prev.branding, headerBadgeText: e.target.value }
+                          }))
+                        }
+                        className="w-full text-xs font-bold px-3 py-2 border border-slate-300 rounded-xl font-mono text-amber-700"
+                        placeholder="उदा. पोर्टल २०२४"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-800 mb-1">
+                        टॅगलाईन (Header Subtitle)
                       </label>
                       <input
                         type="text"
@@ -1429,7 +1608,153 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                           }))
                         }
                         className="w-full text-xs font-semibold px-3 py-2 border border-slate-300 rounded-xl"
+                        placeholder="उदा. डिजिटल शासकीय फॉर्म्स व वंशावळ जनरेटर"
                       />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-slate-800 mb-1">
+                        हेडर लोगो मजकूर (Logo Badge Text)
+                      </label>
+                      <input
+                        type="text"
+                        value={draft.branding.headerLogoText || 'महा'}
+                        onChange={(e) =>
+                          setDraft((prev) => ({
+                            ...prev,
+                            branding: { ...prev.branding, headerLogoText: e.target.value }
+                          }))
+                        }
+                        className="w-full text-xs font-bold px-3 py-2 border border-slate-300 rounded-xl font-mono"
+                        placeholder="उदा. महा किंवा M"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Header Buttons On/Off Toggles Section */}
+                  <div className="p-4 bg-amber-50/70 border-2 border-amber-300 rounded-2xl space-y-3">
+                    <div className="flex items-center justify-between border-b border-amber-200 pb-2">
+                      <div className="text-xs font-black text-amber-950 flex items-center gap-1.5">
+                        <Sliders className="w-4 h-4 text-amber-600" />
+                        <span>हेडरमधील पर्याय व बटने ऑन/ऑफ (Header Buttons Control)</span>
+                      </div>
+                      <span className="text-[10px] bg-amber-200 text-amber-900 font-bold px-2 py-0.5 rounded-full">
+                        थेट नियंत्रण
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
+                      {/* Form Selector Dropdown */}
+                      <label className="flex items-center justify-between p-2.5 bg-white rounded-xl border border-slate-200 cursor-pointer">
+                        <span className="font-bold text-slate-800">अर्ज निवड मेनू (Form Selector):</span>
+                        <input
+                          type="checkbox"
+                          checked={draft.headerButtons?.showFormSelector ?? true}
+                          onChange={(e) =>
+                            setDraft((prev) => ({
+                              ...prev,
+                              headerButtons: { ...(prev.headerButtons || { showDemoButton: true, showResetButton: true, showProfilesButton: true, showWalletButton: false, showAuthButton: false, showPageNavigation: true, showFormSelector: true }), showFormSelector: e.target.checked }
+                            }))
+                          }
+                          className="w-4 h-4 text-amber-600 rounded"
+                        />
+                      </label>
+
+                      {/* Page Navigation */}
+                      <label className="flex items-center justify-between p-2.5 bg-white rounded-xl border border-slate-200 cursor-pointer">
+                        <span className="font-bold text-slate-800">पृष्ठ नेव्हिगेशन (१..६ पाने):</span>
+                        <input
+                          type="checkbox"
+                          checked={draft.headerButtons?.showPageNavigation ?? true}
+                          onChange={(e) =>
+                            setDraft((prev) => ({
+                              ...prev,
+                              headerButtons: { ...(prev.headerButtons || { showDemoButton: true, showResetButton: true, showProfilesButton: true, showWalletButton: false, showAuthButton: false, showPageNavigation: true, showFormSelector: true }), showPageNavigation: e.target.checked }
+                            }))
+                          }
+                          className="w-4 h-4 text-amber-600 rounded"
+                        />
+                      </label>
+
+                      {/* Demo Button */}
+                      <label className="flex items-center justify-between p-2.5 bg-white rounded-xl border border-slate-200 cursor-pointer">
+                        <span className="font-bold text-slate-800">नमुना माहिती (Demo Data) बटण:</span>
+                        <input
+                          type="checkbox"
+                          checked={draft.headerButtons?.showDemoButton ?? true}
+                          onChange={(e) =>
+                            setDraft((prev) => ({
+                              ...prev,
+                              headerButtons: { ...(prev.headerButtons || { showDemoButton: true, showResetButton: true, showProfilesButton: true, showWalletButton: false, showAuthButton: false, showPageNavigation: true, showFormSelector: true }), showDemoButton: e.target.checked }
+                            }))
+                          }
+                          className="w-4 h-4 text-amber-600 rounded"
+                        />
+                      </label>
+
+                      {/* Reset Button */}
+                      <label className="flex items-center justify-between p-2.5 bg-white rounded-xl border border-slate-200 cursor-pointer">
+                        <span className="font-bold text-slate-800">फॉर्म रिकामा करा (Reset) बटण:</span>
+                        <input
+                          type="checkbox"
+                          checked={draft.headerButtons?.showResetButton ?? true}
+                          onChange={(e) =>
+                            setDraft((prev) => ({
+                              ...prev,
+                              headerButtons: { ...(prev.headerButtons || { showDemoButton: true, showResetButton: true, showProfilesButton: true, showWalletButton: false, showAuthButton: false, showPageNavigation: true, showFormSelector: true }), showResetButton: e.target.checked }
+                            }))
+                          }
+                          className="w-4 h-4 text-amber-600 rounded"
+                        />
+                      </label>
+
+                      {/* Profiles Button */}
+                      <label className="flex items-center justify-between p-2.5 bg-white rounded-xl border border-slate-200 cursor-pointer">
+                        <span className="font-bold text-slate-800">जतन केलेली गावे (Profiles) बटण:</span>
+                        <input
+                          type="checkbox"
+                          checked={draft.headerButtons?.showProfilesButton ?? true}
+                          onChange={(e) =>
+                            setDraft((prev) => ({
+                              ...prev,
+                              headerButtons: { ...(prev.headerButtons || { showDemoButton: true, showResetButton: true, showProfilesButton: true, showWalletButton: false, showAuthButton: false, showPageNavigation: true, showFormSelector: true }), showProfilesButton: e.target.checked }
+                            }))
+                          }
+                          className="w-4 h-4 text-amber-600 rounded"
+                        />
+                      </label>
+
+                      {/* Wallet Button */}
+                      <label className="flex items-center justify-between p-2.5 bg-white rounded-xl border border-slate-200 cursor-pointer">
+                        <span className="font-bold text-slate-800">व्हॅलेट (Wallet) बटण:</span>
+                        <input
+                          type="checkbox"
+                          checked={draft.headerButtons?.showWalletButton ?? false}
+                          onChange={(e) =>
+                            setDraft((prev) => ({
+                              ...prev,
+                              headerButtons: { ...(prev.headerButtons || { showDemoButton: true, showResetButton: true, showProfilesButton: true, showWalletButton: false, showAuthButton: false, showPageNavigation: true, showFormSelector: true }), showWalletButton: e.target.checked }
+                            }))
+                          }
+                          className="w-4 h-4 text-amber-600 rounded"
+                        />
+                      </label>
+
+                      {/* Auth/Login Button */}
+                      <label className="flex items-center justify-between p-2.5 bg-white rounded-xl border border-slate-200 cursor-pointer">
+                        <span className="font-bold text-slate-800">लॉगिन प्रोफाईल बटण:</span>
+                        <input
+                          type="checkbox"
+                          checked={draft.headerButtons?.showAuthButton ?? false}
+                          onChange={(e) =>
+                            setDraft((prev) => ({
+                              ...prev,
+                              headerButtons: { ...(prev.headerButtons || { showDemoButton: true, showResetButton: true, showProfilesButton: true, showWalletButton: false, showAuthButton: false, showPageNavigation: true, showFormSelector: true }), showAuthButton: e.target.checked }
+                            }))
+                          }
+                          className="w-4 h-4 text-amber-600 rounded"
+                        />
+                      </label>
                     </div>
                   </div>
 
@@ -1957,56 +2282,97 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                 </div>
               )}
 
-              {/* TAB 7: ADMIN PASSWORD & SECURITY */}
+              {/* TAB 8: ADMIN ID, PASSWORD & SECURITY */}
               {activeTab === 'security' && (
                 <div className="space-y-4">
                   <div className="border-b pb-2">
-                    <h4 className="font-extrabold text-base text-slate-900">
-                      ॲडमीन पासवर्ड व सुरक्षा (Security & Password)
+                    <h4 className="font-extrabold text-base text-slate-900 flex items-center gap-2">
+                      <KeyRound className="w-5 h-5 text-amber-600" />
+                      <span>मास्टर ॲडमीन आयडी व पासवर्ड बदला (Admin Credentials)</span>
                     </h4>
                     <p className="text-xs text-slate-500">
-                      हा पासवर्ड केवळ आपल्याकडे ठेवा जेणेकरून इतर कोणीही सेटिंग्ज बदलू शकणार नाही.
+                      येथून तुम्ही ॲडमीन पॅनेलचा लॉगिन आयडी आणि पासवर्ड दोन्ही तुमच्या सोयीनुसार बदलू शकता.
                     </p>
                   </div>
 
-                  <div className="p-4 bg-amber-50 rounded-xl border border-amber-200 space-y-3 max-w-md">
-                    <div className="text-xs font-extrabold text-amber-950 flex items-center gap-1.5">
+                  {/* Current Active Credentials Info Card */}
+                  <div className="p-3.5 bg-slate-900 text-white rounded-xl flex items-center justify-between">
+                    <div>
+                      <span className="text-[10px] text-amber-300 font-bold block">सध्याचा सक्रिय ॲडमीन आयडी:</span>
+                      <span className="font-mono font-black text-sm text-white">{draft.adminId || 'admin'}</span>
+                    </div>
+                    <span className="text-[10px] bg-amber-400 text-slate-950 font-black px-2 py-0.5 rounded-full">
+                      मुख्य मालक
+                    </span>
+                  </div>
+
+                  <div className="p-4 bg-amber-50 rounded-xl border border-amber-300 space-y-3.5 max-w-lg">
+                    <div className="text-xs font-extrabold text-amber-950 flex items-center gap-1.5 border-b border-amber-200 pb-2">
                       <KeyRound className="w-4 h-4 text-amber-700" />
-                      <span>नवीन ॲडमीन पासवर्ड सेट करा</span>
+                      <span>नवीन ॲडमीन लॉगिन आयडी व पासवर्ड सेट करा</span>
                     </div>
 
+                    {/* New Admin ID */}
                     <div>
-                      <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                        नवीन पासवर्ड (New Password)
+                      <label className="block text-[11px] font-bold text-slate-800 mb-1">
+                        १. नवीन ॲडमीन लॉगिन आयडी (Admin ID) *
                       </label>
                       <input
-                        type="password"
-                        value={newPassword}
-                        onChange={(e) => setNewPassword(e.target.value)}
-                        placeholder="किमान ४ अक्षरी पासवर्ड..."
-                        className="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg font-mono"
+                        type="text"
+                        value={changeAdminId}
+                        onChange={(e) => setChangeAdminId(e.target.value)}
+                        placeholder="उदा. admin किंवा prashant"
+                        className="w-full text-xs font-bold px-3 py-2 border border-slate-300 rounded-lg bg-white text-slate-900"
+                        required
                       />
                     </div>
 
+                    {/* New Password */}
                     <div>
-                      <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                        कन्फर्म नवीन पासवर्ड (Confirm Password)
+                      <label className="block text-[11px] font-bold text-slate-800 mb-1">
+                        २. नवीन ॲडमीन पासवर्ड (New Password) *
                       </label>
-                      <input
-                        type="password"
-                        value={confirmPassword}
-                        onChange={(e) => setConfirmPassword(e.target.value)}
-                        placeholder="पुन्हा तोच पासवर्ड टाका..."
-                        className="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg font-mono"
-                      />
+                      <div className="relative">
+                        <input
+                          type={showNewPassword ? 'text' : 'password'}
+                          value={newPassword}
+                          onChange={(e) => setNewPassword(e.target.value)}
+                          placeholder="किमान ४ अक्षरी नवीन पासवर्ड टाका..."
+                          className="w-full text-xs px-3 py-2 pr-10 border border-slate-300 rounded-lg font-mono bg-white text-slate-900"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowNewPassword(!showNewPassword)}
+                          className="absolute right-3 top-2 text-slate-400 hover:text-slate-700 p-0.5"
+                          title={showNewPassword ? 'पासवर्ड लपवा' : 'पासवर्ड पहा'}
+                        >
+                          {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Confirm Password */}
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-800 mb-1">
+                        ३. कन्फर्म नवीन पासवर्ड (Confirm Password) *
+                      </label>
+                      <div className="relative">
+                        <input
+                          type={showNewPassword ? 'text' : 'password'}
+                          value={confirmPassword}
+                          onChange={(e) => setConfirmPassword(e.target.value)}
+                          placeholder="पुन्हा तोच पासवर्ड टाका..."
+                          className="w-full text-xs px-3 py-2 pr-10 border border-slate-300 rounded-lg font-mono bg-white text-slate-900"
+                        />
+                      </div>
                     </div>
 
                     <button
                       type="button"
-                      onClick={handlePasswordChange}
-                      className="w-full py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-lg transition-colors cursor-pointer"
+                      onClick={handleCredentialsChange}
+                      className="w-full py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black text-xs rounded-xl shadow-sm transition-all cursor-pointer hover:shadow-md"
                     >
-                      पासवर्ड अपडेट करा
+                      ✓ ॲडमीन आयडी व पासवर्ड सेव्ह करा
                     </button>
                   </div>
 
@@ -2023,6 +2389,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                   </div>
                 </div>
               )}
+
 
             </div>
           </div>

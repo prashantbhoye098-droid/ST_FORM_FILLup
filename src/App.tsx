@@ -125,6 +125,23 @@ export default function App() {
     try {
       const saved = localStorage.getItem(LOCAL_STORAGE_FORM_KEY);
       let base = saved ? JSON.parse(saved) : DEMO_FORM_DATA;
+
+      // Merge permanent center profile if operator previously saved one
+      const savedCenter = localStorage.getItem('permanent_center_profile_v4');
+      if (savedCenter) {
+        const centerObj = JSON.parse(savedCenter);
+        base = {
+          ...base,
+          centerName: centerObj.centerName || base.centerName,
+          centerAddress: centerObj.centerAddress || base.centerAddress,
+          centerContact: centerObj.centerContact || base.centerContact,
+          subDivisionalOffice: centerObj.subDivisionalOffice || base.subDivisionalOffice,
+          subDivisionPlace: centerObj.subDivisionPlace || base.subDivisionPlace,
+          centerLogoUrl: centerObj.centerLogoUrl !== undefined ? centerObj.centerLogoUrl : base.centerLogoUrl,
+          asskLogoOption: centerObj.asskLogoOption || base.asskLogoOption,
+          customAsskLogoUrl: centerObj.customAsskLogoUrl !== undefined ? centerObj.customAsskLogoUrl : base.customAsskLogoUrl
+        };
+      }
       return base;
     } catch (e) {
       console.error('Failed to load local storage draft', e);
@@ -210,31 +227,40 @@ export default function App() {
   const [zoomLevel, setZoomLevel] = useState<number>(90);
   const [printTarget, setPrintTarget] = useState<'all' | 'single'>('all');
 
-  // Determine if watermark is removed
+  // Watermark is strictly removed only if payment has been made for current document
   const isWatermarkRemoved =
     !adminSettings.payment.isPaymentSystemActive ||
     !adminSettings.watermark.enabled ||
-    userProfile.plan !== 'free' ||
-    userProfile.isSubscribed ||
     hasPaidCurrentDoc;
 
   // Sync Form Data with Admin Settings & Watermark dynamically
   useEffect(() => {
-    setFormData((prev) => ({
-      ...prev,
-      centerName: adminSettings.branding.centerName || prev.centerName,
-      centerAddress: adminSettings.branding.centerAddress || prev.centerAddress,
-      centerContact: adminSettings.branding.centerContact || prev.centerContact,
-      centerLogoUrl: adminSettings.branding.centerLogoUrl || prev.centerLogoUrl,
-      watermarkText: adminSettings.watermark.text,
-      watermarkSubText: adminSettings.watermark.subText,
-      watermarkColor: adminSettings.watermark.color,
-      watermarkOpacity: adminSettings.watermark.opacity,
-      watermarkFontSize: adminSettings.watermark.fontSize,
-      watermarkRotation: adminSettings.watermark.rotation,
-      watermarkEnabled: adminSettings.watermark.enabled,
-      isWatermarkRemoved: isWatermarkRemoved
-    }));
+    setFormData((prev) => {
+      let permanentCenter: any = null;
+      try {
+        const saved = localStorage.getItem('permanent_center_profile_v4');
+        if (saved) permanentCenter = JSON.parse(saved);
+      } catch (e) {
+        console.error(e);
+      }
+
+      return {
+        ...prev,
+        // Operator's entered center info or permanent profile takes top priority, admin branding is only default fallback
+        centerName: prev.centerName || permanentCenter?.centerName || adminSettings.branding.centerName,
+        centerAddress: prev.centerAddress || permanentCenter?.centerAddress || adminSettings.branding.centerAddress,
+        centerContact: prev.centerContact || permanentCenter?.centerContact || adminSettings.branding.centerContact,
+        centerLogoUrl: prev.centerLogoUrl !== undefined ? prev.centerLogoUrl : (permanentCenter?.centerLogoUrl || adminSettings.branding.centerLogoUrl),
+        watermarkText: adminSettings.watermark.text,
+        watermarkSubText: adminSettings.watermark.subText,
+        watermarkColor: adminSettings.watermark.color,
+        watermarkOpacity: adminSettings.watermark.opacity,
+        watermarkFontSize: adminSettings.watermark.fontSize,
+        watermarkRotation: adminSettings.watermark.rotation,
+        watermarkEnabled: adminSettings.watermark.enabled,
+        isWatermarkRemoved: isWatermarkRemoved
+      };
+    });
   }, [adminSettings, isWatermarkRemoved]);
 
   // Total pages based on category
@@ -314,6 +340,7 @@ export default function App() {
   const handleCategoryChange = (category: FormCategory) => {
     updateFormData({ activeFormCategory: category });
     setActivePagePreview(0);
+    setHasPaidCurrentDoc(false); // New form requires payment before watermark is removed!
     if (category === 'INCOME_DECLARATION') {
       setActiveTab('income');
     } else if (category === 'SELF_DECLARATIONS_16') {
@@ -352,11 +379,25 @@ export default function App() {
   };
 
   const handleLoadDemo = () => {
-    if (window.confirm('नमुना माहिती (Demo Data) लोड करायची आहे का? सध्याचा डेटा बदलेल.')) {
+    if (window.confirm('नमुना माहिती (Demo Data) लोड करायची आहे का? सध्याचा अर्ज डेटा बदलेल, मात्र तुमच्या केंद्राची माहिती व लोगो सुरक्षित राहील.')) {
+      let permanentCenter: any = null;
+      try {
+        const saved = localStorage.getItem('permanent_center_profile_v4');
+        if (saved) permanentCenter = JSON.parse(saved);
+      } catch (e) {
+        console.error(e);
+      }
+
       setFormData({
         ...DEMO_FORM_DATA,
-        centerName: adminSettings.branding.centerName || DEMO_FORM_DATA.centerName,
-        centerAddress: adminSettings.branding.centerAddress || DEMO_FORM_DATA.centerAddress,
+        centerName: permanentCenter?.centerName || formData.centerName || adminSettings.branding.centerName || DEMO_FORM_DATA.centerName,
+        centerAddress: permanentCenter?.centerAddress || formData.centerAddress || adminSettings.branding.centerAddress || DEMO_FORM_DATA.centerAddress,
+        centerContact: permanentCenter?.centerContact || formData.centerContact || adminSettings.branding.centerContact,
+        centerLogoUrl: permanentCenter?.centerLogoUrl !== undefined ? permanentCenter.centerLogoUrl : (formData.centerLogoUrl || adminSettings.branding.centerLogoUrl),
+        asskLogoOption: permanentCenter?.asskLogoOption || formData.asskLogoOption,
+        customAsskLogoUrl: permanentCenter?.customAsskLogoUrl !== undefined ? permanentCenter.customAsskLogoUrl : formData.customAsskLogoUrl,
+        subDivisionalOffice: permanentCenter?.subDivisionalOffice || formData.subDivisionalOffice,
+        subDivisionPlace: permanentCenter?.subDivisionPlace || formData.subDivisionPlace,
         watermarkText: adminSettings.watermark.text,
         isWatermarkRemoved: isWatermarkRemoved
       });
@@ -364,17 +405,25 @@ export default function App() {
   };
 
   const handleReset = () => {
-    if (window.confirm('नवीन अर्ज भरण्यासाठी अर्जदाराची माहिती रिकामी करायची का? (केंद्राची माहिती कायम राहील)')) {
+    if (window.confirm('नवीन अर्ज भरण्यासाठी अर्जदाराची माहिती रिकामी करायची का? (तुमच्या केंद्राची माहिती, पत्ता व लोगो कायमस्वरूपी सुरक्षित राहील)')) {
+      let permanentCenter: any = null;
+      try {
+        const saved = localStorage.getItem('permanent_center_profile_v4');
+        if (saved) permanentCenter = JSON.parse(saved);
+      } catch (e) {
+        console.error(e);
+      }
+
       setFormData({
         ...EMPTY_FORM_DATA,
-        centerName: adminSettings.branding.centerName || formData.centerName,
-        centerAddress: adminSettings.branding.centerAddress || formData.centerAddress,
-        centerLogoUrl: adminSettings.branding.centerLogoUrl || formData.centerLogoUrl,
-        centerContact: adminSettings.branding.centerContact || formData.centerContact,
-        asskLogoOption: formData.asskLogoOption,
-        customAsskLogoUrl: formData.customAsskLogoUrl,
-        subDivisionalOffice: formData.subDivisionalOffice,
-        subDivisionPlace: formData.subDivisionPlace,
+        centerName: permanentCenter?.centerName || formData.centerName || adminSettings.branding.centerName,
+        centerAddress: permanentCenter?.centerAddress || formData.centerAddress || adminSettings.branding.centerAddress,
+        centerLogoUrl: permanentCenter?.centerLogoUrl !== undefined ? permanentCenter.centerLogoUrl : (formData.centerLogoUrl || adminSettings.branding.centerLogoUrl),
+        centerContact: permanentCenter?.centerContact || formData.centerContact || adminSettings.branding.centerContact,
+        asskLogoOption: permanentCenter?.asskLogoOption || formData.asskLogoOption,
+        customAsskLogoUrl: permanentCenter?.customAsskLogoUrl !== undefined ? permanentCenter.customAsskLogoUrl : formData.customAsskLogoUrl,
+        subDivisionalOffice: permanentCenter?.subDivisionalOffice || formData.subDivisionalOffice,
+        subDivisionPlace: permanentCenter?.subDivisionPlace || formData.subDivisionPlace,
         activeFormCategory: formData.activeFormCategory,
         watermarkText: adminSettings.watermark.text,
         isWatermarkRemoved: isWatermarkRemoved
@@ -823,22 +872,13 @@ export default function App() {
         isOpen={isPaymentModalOpen}
         onClose={() => setIsPaymentModalOpen(false)}
         user={userProfile}
+        adminSettings={adminSettings}
         pageCount={printTarget === 'single' ? 1 : totalPages}
         onUnlockWatermarkForPrint={() => {
           setHasPaidCurrentDoc(true);
           setTimeout(() => {
             executePrint(printTarget === 'all');
-          }, 300);
-        }}
-        onCreditWallet={(amount) => {
-          setUserProfile((prev) => ({
-            ...prev,
-            walletBalance: Math.max(0, prev.walletBalance + amount)
-          }));
-        }}
-        onOpenSubscription={() => setIsSubscriptionModalOpen(true)}
-        onProceedWithWatermark={() => {
-          executePrint(printTarget === 'all');
+          }, 350);
         }}
       />
 
