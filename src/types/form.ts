@@ -6,7 +6,8 @@ export type FormCategory =
   | 'ST_CASTE' // अनुसूचित जमाती (ST) जात प्रमाणपत्र (६ पृष्ठे)
   | 'OBC_SC_CASTE' // OBC / SC / VJNT / SBC जात प्रमाणपत्र (७ पृष्ठे)
   | 'INCOME_DECLARATION' // उत्पन्नाचा दाखला - प्रपत्र-अ मिळकत स्वघोषणा
-  | 'SELF_DECLARATIONS_16'; // १६ विविध स्वयं घोषणापत्र दाखले (रहिवास, विधवा, विभक्त कुटुंब, इ.)
+  | 'SELF_DECLARATIONS_16' // १६ विविध स्वयं घोषणापत्र दाखले (रहिवास, विधवा, विभक्त कुटुंब, इ.)
+  | 'PAN_CARD_49A'; // ५. पॅन कार्ड (PAN Form 49A) २-पानी फोटो व स्वाक्षरी ऑटो-पेस्ट
 
 export type YesNo = 'होय' | 'नाही';
 
@@ -225,4 +226,24 @@ export interface STFormData {
   incomeYears: [string, string, string]; // उदा. ['२०२३', '२०२४', '२०२५']
   incomeRows: IncomeSourceRow[];
   incomePurpose: string; // उदा. 'शैक्षणिक/शासकीय/प्रकरण कामी'
+
+  // पॅन कार्ड (PAN Form 49A / Correction CR-01) फोटो व सही पेस्टिंग
+  panFormType?: 'NEW_49A' | 'CORRECTION_CR01';
+  panPdfFileName?: string;
+  panPdfBytes?: Uint8Array;
+  panPage1ImageUrl?: string;
+  panPage2ImageUrl?: string;
+  panCrossSignEnabled?: boolean;
+  panPhoto1X?: number; // X offset percentage
+  panPhoto1Y?: number; // Y offset percentage
+  panPhoto1Width?: number; // width %
+  panPhoto1Height?: number; // height %
+  panPhoto2X?: number;
+  panPhoto2Y?: number;
+  panPhoto2Width?: number;
+  panPhoto2Height?: number;
+  panSignPage2X?: number;
+  panSignPage2Y?: number;
+  panSignPage2Width?: number;
+  panSignPage2Height?: number;
 }

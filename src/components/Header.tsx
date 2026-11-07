@@ -13,18 +13,20 @@ import {
   Wallet,
   User,
   ShieldCheck,
-  KeyRound
+  KeyRound,
+  FileText,
+  BookOpen
 } from 'lucide-react';
 
 interface HeaderProps {
   onPrintAll: () => void;
   onLoadDemo: () => void;
   onReset: () => void;
-  onOpenSubscription: () => void;
   onOpenProfiles: () => void;
   onOpenAdmin: () => void;
   onOpenAuth: () => void;
   onOpenPayment: () => void;
+  onOpenGuides?: () => void;
   currentCategory: FormCategory;
   onSelectCategory: (cat: FormCategory) => void;
   currentPage: number;
@@ -38,11 +40,11 @@ export const Header: React.FC<HeaderProps> = ({
   onPrintAll,
   onLoadDemo,
   onReset,
-  onOpenSubscription,
   onOpenProfiles,
   onOpenAdmin,
   onOpenAuth,
   onOpenPayment,
+  onOpenGuides,
   currentCategory,
   onSelectCategory,
   currentPage,
@@ -90,21 +92,45 @@ export const Header: React.FC<HeaderProps> = ({
               onChange={(e) => onSelectCategory(e.target.value as FormCategory)}
               className="appearance-none bg-slate-900 hover:bg-slate-850 text-white font-bold text-xs pl-2.5 pr-7 py-1.5 sm:py-2 rounded-lg border border-slate-700 cursor-pointer focus:outline-hidden focus:ring-2 focus:ring-amber-500 shadow-sm max-w-[210px] sm:max-w-none truncate"
             >
-              {adminSettings.tabs.stFormEnabled && (
-                <option value="ST_CASTE">{adminSettings.tabs.stFormLabel}</option>
+              {(adminSettings.tabs.stFormEnabled ?? true) && (
+                <option value="ST_CASTE">{adminSettings.tabs.stFormLabel || '१. अनुसूचित जमाती (ST) जात प्रमाणपत्र'}</option>
               )}
-              {adminSettings.tabs.obcFormEnabled && (
-                <option value="OBC_SC_CASTE">{adminSettings.tabs.obcFormLabel}</option>
+              {(adminSettings.tabs.obcFormEnabled ?? true) && (
+                <option value="OBC_SC_CASTE">{adminSettings.tabs.obcFormLabel || '२. OBC / SC / VJNT / SBC जात प्रमाणपत्र'}</option>
               )}
-              {adminSettings.tabs.incomeFormEnabled && (
-                <option value="INCOME_DECLARATION">{adminSettings.tabs.incomeFormLabel}</option>
+              {(adminSettings.tabs.incomeFormEnabled ?? true) && (
+                <option value="INCOME_DECLARATION">{adminSettings.tabs.incomeFormLabel || '३. उत्पन्नाचा दाखला - प्रपत्र-अ'}</option>
               )}
-              {adminSettings.tabs.selfDeclFormEnabled && (
-                <option value="SELF_DECLARATIONS_16">{adminSettings.tabs.selfDeclFormLabel}</option>
+              {(adminSettings.tabs.selfDeclFormEnabled ?? true) && (
+                <option value="SELF_DECLARATIONS_16">{adminSettings.tabs.selfDeclFormLabel || '४. शासकीय स्वयं घोषणापत्र (१६ दाखले)'}</option>
+              )}
+              {(adminSettings.tabs.panFormEnabled ?? true) && (
+                <option value="PAN_CARD_49A">{adminSettings.tabs.panFormLabel || '५. पॅन कार्ड (PAN) फोटो व सही पेस्ट'}</option>
               )}
             </select>
             <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2 top-2.5 pointer-events-none" />
           </div>
+        )}
+
+        {/* Quick PAN Card 1-Click Button */}
+        {(adminSettings.tabs.panFormEnabled ?? true) && (
+          <button
+            type="button"
+            onClick={() => onSelectCategory('PAN_CARD_49A')}
+            className={`inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg font-black text-xs transition-all cursor-pointer shadow-xs whitespace-nowrap ${
+              currentCategory === 'PAN_CARD_49A'
+                ? 'bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 text-white ring-2 ring-blue-400 shadow-md'
+                : 'bg-blue-950/80 hover:bg-blue-900 text-blue-200 border border-blue-700/60'
+            }`}
+            title="पॅन कार्ड (PAN Form 49A) २-पानी फोटो व सही पेस्टिंग टूल"
+          >
+            <FileText className="w-3.5 h-3.5 text-amber-300" />
+            <span className="hidden sm:inline">🪪 PAN फॉर्म (फोटो+सही)</span>
+            <span className="sm:hidden">🪪 PAN फॉर्म</span>
+            {currentCategory === 'PAN_CARD_49A' && (
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            )}
+          </button>
         )}
       </div>
 
@@ -176,6 +202,19 @@ export const Header: React.FC<HeaderProps> = ({
           >
             <MapPin className="w-3.5 h-3.5 text-indigo-400" />
             <span className="hidden sm:inline">गावे</span>
+          </button>
+        )}
+
+        {/* Scheme & Document Guides Button (AdSense & Knowledge Base) */}
+        {onOpenGuides && (
+          <button
+            type="button"
+            onClick={onOpenGuides}
+            title="शासकीय दाखले माहिती, नियम व कागदपत्रे मार्गदर्शक"
+            className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-bold text-amber-200 bg-amber-950/80 hover:bg-amber-900 border border-amber-700/80 rounded-md transition-colors whitespace-nowrap shadow-2xs cursor-pointer"
+          >
+            <BookOpen className="w-3.5 h-3.5 text-amber-400" />
+            <span className="hidden sm:inline">दाखले माहिती</span>
           </button>
         )}
 

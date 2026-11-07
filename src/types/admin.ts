@@ -51,10 +51,30 @@ export interface AdminSettings {
     quarterlyPlanPrice: number; // Default: 499
     yearlyPlanPrice: number; // Default: 1499
     lifetimePlanPrice: number; // Default: 2999
-    upiId: string; // Default: 'prashantbhoye098@oksbi'
+    upiId: string; // Optional custom UPI ID (Default: empty)
     payeeName: string; // Default: 'माऊली डिजिटल सेवा केंद्र'
     customQrCodeUrl: string; // Admin can upload/paste custom QR code image
     allowFreeWatermarkedPrint: boolean; // If false, forces payment before any print
+
+    // Specific Per-PDF Pricing (प्रतेक PDF फाईलचे वेगळे पेमेंट)
+    docFees: {
+      stCasteFee: number; // अनुसूचित जमाती (ST) जात प्रमाणपत्र व वंशावळ (६ पाने)
+      obcScFee: number; // OBC / SC जात प्रमाणपत्र (७ पाने)
+      incomeFee: number; // उत्पन्नाचा दाखला अर्ज (प्रपत्र-अ)
+      selfDeclFee: number; // १६ विविध शासकीय स्वघोषणापत्र दाखले
+      panCardFee: number; // पॅन कार्ड अर्ज (२-पानी फॉर्म)
+    };
+
+    // Shop UPI QR Code Option On/Off Toggle (बिगर UTR प्रिंट रोखण्यासाठी)
+    enableShopQrPayment: boolean; // जर बंद असेल तर थेट दुकानाचा QR लपवला जाईल व फक्त Razorpay ऑटो-व्हेरीफाय दिसेल
+    requireStrictUtrVerification: boolean; // QR चालू असताना किमान १२-अंकी UTR नंबर सक्तीचा
+
+    // Razorpay Payment Gateway Integration
+    razorpay?: {
+      enabled: boolean;
+      keyId: string; // e.g. rzp_live_xxxxxxxx or rzp_test_xxxxxxxx
+      keySecret?: string;
+    };
   };
 
   // Anti-Theft & Anti-Copy Protection
@@ -108,6 +128,8 @@ export interface AdminSettings {
     incomeFormLabel: string;
     selfDeclFormEnabled: boolean;
     selfDeclFormLabel: string;
+    panFormEnabled: boolean;
+    panFormLabel: string;
 
     // Left Tab Titles
     tabCenter: string;
@@ -119,6 +141,16 @@ export interface AdminSettings {
     tabSignatures: string;
     tabIncome: string;
     tabSelfDecl: string;
+    tabPanCard: string;
+  };
+
+  // Google AdSense Monetization Settings
+  adsense: {
+    enabled: boolean;
+    publisherId: string; // e.g. "ca-pub-XXXXXXXXXXXXXXXX"
+    showTopBanner: boolean;
+    showSidebarBanner: boolean;
+    showBottomBanner: boolean;
   };
 
   // General Text Overrides dictionary
@@ -137,7 +169,7 @@ export const DEFAULT_ADMIN_SETTINGS: AdminSettings = {
 
   watermark: {
     enabled: true,
-    text: 'माऊली डिजिटल सेवा केंद्र पाथवे दिगर',
+    text: 'माऊली डिजिटल सेवा केंद्र पठावे दिगर',
     subText: '★ अधिकृत वापरासाठी सबस्क्रिप्शन आवश्यक · विनामूल्य नमुना प्रत ★',
     opacity: 0.25,
     color: '#b91c1c',
@@ -158,10 +190,24 @@ export const DEFAULT_ADMIN_SETTINGS: AdminSettings = {
     quarterlyPlanPrice: 499,
     yearlyPlanPrice: 1499,
     lifetimePlanPrice: 2999,
-    upiId: 'prashantbhoye098@oksbi',
-    payeeName: 'माऊली डिजिटल सेवा केंद्र पाथवे दिगर',
+    upiId: '', // चुकीचा UPI ID काढण्यात आला आहे (वापरकर्त्याच्या विनंतीनुसार)
+    payeeName: 'माऊली डिजिटल सेवा केंद्र (प्रशांत वाळू भोये)',
     customQrCodeUrl: '',
-    allowFreeWatermarkedPrint: false // Must pay before print to remove watermark!
+    allowFreeWatermarkedPrint: false, // Must pay before print to remove watermark!
+    docFees: {
+      stCasteFee: 20,
+      obcScFee: 20,
+      incomeFee: 10,
+      selfDeclFee: 10,
+      panCardFee: 15
+    },
+    enableShopQrPayment: false, // Default: OFF (फक्त अधिकृत Razorpay ऑटो-व्हेरीफाय दिसेल जेणेकरून कोणीही खोटा UTR न टाकता प्रिंट करू शकणार नाही)
+    requireStrictUtrVerification: true,
+    razorpay: {
+      enabled: true,
+      keyId: 'rzp_test_TxBucNNFf7RzjN',
+      keySecret: 'lRYJan90Xt97vqGtnkzVQVWe'
+    }
   },
 
   antiCopy: {
@@ -171,14 +217,14 @@ export const DEFAULT_ADMIN_SETTINGS: AdminSettings = {
   },
 
   branding: {
-    portalTitle: 'आपले सरकार सेवा केंद्र',
-    portalTagline: 'डिजिटल शासकीय फॉर्म्स व वंशावळ जनरेटर',
-    headerBadgeText: 'पोर्टल २०२४',
-    headerLogoText: 'महा',
-    centerName: 'आपले सरकार सेवा केंद्र',
-    centerAddress: 'ता. बागलाण, जि. नाशिक',
-    centerContact: '९८२२xxxxxx',
-    supportWhatsapp: '९८२२xxxxxx',
+    portalTitle: 'mauliservices.in - आपले सरकार सेवा केंद्र',
+    portalTagline: 'डिजिटल शासकीय फॉर्म्स, वंशावळ व पॅन कार्ड पोर्टल (mauliservices.in)',
+    headerBadgeText: 'mauliservices.in',
+    headerLogoText: 'माऊली',
+    centerName: 'माऊली डिजिटल सेवा केंद्र',
+    centerAddress: 'मु.पो. पठावे दिगर, ता. बागलाण, जि. नाशिक - ४२३३०१',
+    centerContact: '७०८३०३४६०७',
+    supportWhatsapp: '७०८३०३४६०७',
     centerLogoUrl: '',
     asskLogoOption: 'official_assk',
     customAsskLogoUrl: ''
@@ -209,6 +255,8 @@ export const DEFAULT_ADMIN_SETTINGS: AdminSettings = {
     incomeFormLabel: '३. उत्पन्नाचा दाखला - प्रपत्र-अ (३ वर्षे उत्पन्न)',
     selfDeclFormEnabled: true,
     selfDeclFormLabel: '४. शासकीय स्वयं घोषणापत्र (१६ दाखले)',
+    panFormEnabled: true,
+    panFormLabel: '५. पॅन कार्ड (PAN) फोटो व सही पेस्ट',
 
     tabCenter: 'केंद्र व लोगो',
     tabApplicant: '१. अर्जदार',
@@ -218,7 +266,16 @@ export const DEFAULT_ADMIN_SETTINGS: AdminSettings = {
     tabVanshaval: '५. वंशावळ व नाव बदल',
     tabSignatures: '६. स्वाक्षरी व फोटो',
     tabIncome: '२. ३ वर्षे उत्पन्न तक्ता',
-    tabSelfDecl: '२. १६ दाखले निवड'
+    tabSelfDecl: '२. १६ दाखले निवड',
+    tabPanCard: '२. PAN फोटो व सही सेटिंग'
+  },
+
+  adsense: {
+    enabled: true,
+    publisherId: '', // Set your ca-pub-XXXXXXXXXXXXXXXX once approved
+    showTopBanner: true,
+    showSidebarBanner: true,
+    showBottomBanner: true
   },
 
   textOverrides: {

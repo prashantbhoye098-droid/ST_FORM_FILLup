@@ -255,5 +255,24 @@ export const DEMO_FORM_DATA: STFormData = {
   incomeFamilyMembersCount: 4,
   incomeLandHectare: '२.२०',
   hasLand: true,
-  incomeRows: DEFAULT_INCOME_ROWS
+  incomeRows: DEFAULT_INCOME_ROWS,
+
+  // Default PAN Card 49A photo & signature positioning
+  panFormType: 'NEW_49A',
+  panPdfFileName: 'A125752330_PAN_Form.pdf',
+  panPage1ImageUrl: '/assets/aistudio/pan_page_1.png',
+  panPage2ImageUrl: '/assets/aistudio/pan_page_2.png',
+  panCrossSignEnabled: true,
+  panPhoto1X: 4.8,
+  panPhoto1Y: 13.5,
+  panPhoto1Width: 14.5,
+  panPhoto1Height: 13.2,
+  panPhoto2X: 80.8,
+  panPhoto2Y: 13.5,
+  panPhoto2Width: 14.5,
+  panPhoto2Height: 13.2,
+  panSignPage2X: 57.5,
+  panSignPage2Y: 90.2,
+  panSignPage2Width: 35.5,
+  panSignPage2Height: 4.8
 };

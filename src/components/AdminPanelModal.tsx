@@ -31,7 +31,9 @@ import {
   Crown,
   Calendar,
   Building2,
-  ExternalLink
+  ExternalLink,
+  Zap,
+  Globe
 } from 'lucide-react';
 
 interface AdminPanelModalProps {
@@ -205,7 +207,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
       centerName: newCenterName.trim(),
       ownerName: newOwnerName.trim(),
       mobile: newMobile.trim(),
-      village: newVillage.trim() || 'पाथवे',
+      village: newVillage.trim() || 'पठावे दिगर',
       taluka: newTaluka.trim() || 'बागलाण',
       district: newDistrict.trim() || 'नाशिक',
       plan: newPlan,
@@ -762,142 +764,265 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
               {/* TAB 2: PAYMENT & MONETIZATION SETTINGS */}
               {activeTab === 'payment' && (
                 <div className="space-y-4">
-                  <div className="border-b pb-2 flex items-center justify-between">
-                    <div>
-                      <h4 className="font-extrabold text-base text-slate-900">
-                        पेमेंट पद्धती व फी नियंत्रण (Payment Methods)
-                      </h4>
-                      <p className="text-xs text-slate-500">
-                        येथून तुम्ही पेमेंट चालू किंवा बंद करू शकता, प्रति पान ₹१० फी व UPI QR सेट करू शकता.
-                      </p>
-                    </div>
-
-                    {/* Master Payment Toggle */}
-                    <label className="flex items-center gap-2 cursor-pointer bg-amber-50 px-3 py-1.5 rounded-xl border border-amber-300">
-                      <input
-                        type="checkbox"
-                        checked={draft.payment.isPaymentSystemActive}
-                        onChange={(e) =>
-                          setDraft((prev) => ({
-                            ...prev,
-                            payment: {
-                              ...prev.payment,
-                              isPaymentSystemActive: e.target.checked
-                            }
-                          }))
-                        }
-                        className="w-4 h-4 text-amber-600 rounded"
-                      />
-                      <span className="text-xs font-black text-amber-950">
-                        {draft.payment.isPaymentSystemActive ? 'पेमेंट सक्रिय' : 'पेमेंट बंद (मोफत मोड)'}
-                      </span>
-                    </label>
+                  <div className="border-b pb-2">
+                    <h4 className="font-extrabold text-base text-slate-900">
+                      पेमेंट पद्धती व फी नियंत्रण (Payment Methods)
+                    </h4>
+                    <p className="text-xs text-slate-500">
+                      येथून तुम्ही संपूर्ण पोर्टलची पेमेंट सिस्टीम एका बटनाने चालू (ON) किंवा बंद (OFF) करू शकता.
+                    </p>
                   </div>
 
-                  {/* Payment Features Toggles */}
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    <label className="p-3 bg-slate-50 rounded-xl border border-slate-200 flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={draft.payment.isPayPerPageActive}
-                        onChange={(e) =>
-                          setDraft((prev) => ({
-                            ...prev,
-                            payment: { ...prev.payment, isPayPerPageActive: e.target.checked }
-                          }))
-                        }
-                        className="w-4 h-4 text-amber-600 rounded"
-                      />
-                      <div>
-                        <div className="text-xs font-bold text-slate-900">पे-पर-पेज (₹१०)</div>
-                        <div className="text-[10px] text-slate-500">प्रति प्रिंट शुल्क</div>
-                      </div>
-                    </label>
-
-                    <label className="p-3 bg-slate-50 rounded-xl border border-slate-200 flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={draft.payment.isWalletActive}
-                        onChange={(e) =>
-                          setDraft((prev) => ({
-                            ...prev,
-                            payment: { ...prev.payment, isWalletActive: e.target.checked }
-                          }))
-                        }
-                        className="w-4 h-4 text-amber-600 rounded"
-                      />
-                      <div>
-                        <div className="text-xs font-bold text-slate-900">व्हॅलेट सिस्टीम</div>
-                        <div className="text-[10px] text-slate-500">ऑपरेटर व्हॅलेट रिचार्ज</div>
-                      </div>
-                    </label>
-
-                    <label className="p-3 bg-slate-50 rounded-xl border border-slate-200 flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={draft.payment.isSubscriptionActive}
-                        onChange={(e) =>
-                          setDraft((prev) => ({
-                            ...prev,
-                            payment: { ...prev.payment, isSubscriptionActive: e.target.checked }
-                          }))
-                        }
-                        className="w-4 h-4 text-amber-600 rounded"
-                      />
-                      <div>
-                        <div className="text-xs font-bold text-slate-900">सबस्क्रिप्शन प्लॅन्स</div>
-                        <div className="text-[10px] text-slate-500">मासिक / वार्षिक व्हीआयपी</div>
-                      </div>
-                    </label>
-                  </div>
-
-                  {/* 100% Paid Portal Gatekeeper Master Toggle */}
-                  <div className="p-4 bg-gradient-to-r from-amber-500/15 via-orange-500/10 to-amber-500/15 rounded-2xl border-2 border-amber-400/80 space-y-2">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Lock className="w-5 h-5 text-amber-600" />
+                  {/* MASTER PAYMENT BOX (ON / OFF) */}
+                  <div className={`p-4 sm:p-5 rounded-2xl border-2 transition-all ${
+                    draft.payment.isPaymentSystemActive
+                      ? 'bg-gradient-to-r from-emerald-500/15 via-teal-500/10 to-emerald-500/15 border-emerald-500 shadow-sm'
+                      : 'bg-slate-100 border-slate-300'
+                  }`}>
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                      <div className="flex items-center gap-3">
+                        <div className={`w-11 h-11 rounded-xl flex items-center justify-center font-black ${
+                          draft.payment.isPaymentSystemActive
+                            ? 'bg-emerald-600 text-white shadow-xs'
+                            : 'bg-slate-400 text-white'
+                        }`}>
+                          <CreditCard className="w-6 h-6" />
+                        </div>
                         <div>
-                          <div className="text-sm font-black text-slate-900">
-                            🔒 १००% सक्तीचे पेड पोर्टल (Enforce 100% Paid Gatekeeper)
+                          <div className="text-sm font-black text-slate-900 flex items-center gap-2">
+                            <span>पेमेंट बॉक्स नियंत्रण (Payment Box)</span>
+                            <span className={`text-[10px] font-black px-2.5 py-0.5 rounded-full ${
+                              draft.payment.isPaymentSystemActive
+                                ? 'bg-emerald-600 text-white shadow-2xs'
+                                : 'bg-slate-500 text-white'
+                            }`}>
+                              {draft.payment.isPaymentSystemActive ? '● चालू (ON)' : '○ बंद (OFF - मोफत)'}
+                            </span>
                           </div>
-                          <div className="text-[11px] text-slate-600">
-                            चालू असल्यास: नोंदणीकृत आयडी-पासवर्ड किंवा सबस्क्रिप्शन घेतल्याशिवाय कोणीही पोर्टल वापरू शकत नाही!
-                          </div>
+                          <p className="text-xs text-slate-600 mt-1 leading-relaxed">
+                            {draft.payment.isPaymentSystemActive
+                              ? 'चालू असताना: ग्राहक किंवा ऑपरेटरने PDF डाउनलोड / प्रिंटवर क्लिक केल्यावर आधी Razorpay किंवा QR द्वारे पेमेंट करावे लागेल, मगच वॉटरमार्क निघून फाईल डाऊनलोड होईल.'
+                              : 'बंद असताना: कोणत्याही पेमेंटशिवाय सर्व अर्ज व PDF फाईल्स थेट विनामूल्य डाऊनलोड व प्रिंट होतील!'}
+                          </p>
                         </div>
                       </div>
-                      <label className="relative inline-flex items-center cursor-pointer">
+
+                      <label className="relative inline-flex items-center cursor-pointer shrink-0 self-start sm:self-auto">
                         <input
                           type="checkbox"
-                          checked={draft.payment.enforcePaidLogin}
+                          checked={draft.payment.isPaymentSystemActive}
                           onChange={(e) =>
                             setDraft((prev) => ({
                               ...prev,
-                              payment: { ...prev.payment, enforcePaidLogin: e.target.checked }
+                              payment: {
+                                ...prev.payment,
+                                isPaymentSystemActive: e.target.checked
+                              }
                             }))
                           }
                           className="sr-only peer"
                         />
-                        <div className="w-11 h-6 bg-slate-300 peer-focus:outline-hidden rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-600"></div>
+                        <div className="w-14 h-7 bg-slate-300 peer-focus:outline-hidden rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[4px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-emerald-600"></div>
                       </label>
                     </div>
 
-                    <div className="pt-2 border-t border-amber-200/80 flex items-center justify-between text-xs">
-                      <span className="text-slate-700 font-bold">नवीन नोंदणी झाल्यावर तत्काळ आयडी-पासवर्ड ॲक्टिव्हेट करा (Auto-Approve):</span>
-                      <label className="flex items-center gap-1.5 cursor-pointer font-bold">
-                        <input
-                          type="checkbox"
-                          checked={draft.payment.autoApproveNewRegistrations}
-                          onChange={(e) =>
-                            setDraft((prev) => ({
-                              ...prev,
-                              payment: { ...prev.payment, autoApproveNewRegistrations: e.target.checked }
-                            }))
-                          }
-                          className="w-4 h-4 text-amber-600 rounded"
-                        />
-                        <span>{draft.payment.autoApproveNewRegistrations ? 'चालू' : 'बंद'}</span>
-                      </label>
-                    </div>
+                    {/* Per-Document Specific Pricing (प्रत्येक दाखल्याचे स्वतंत्र पेमेंट नियंत्रण) */}
+                    {draft.payment.isPaymentSystemActive && (
+                      <div className="mt-4 pt-3 border-t border-emerald-300/60 space-y-3 animate-fade-in">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <span className="font-black text-slate-900 text-xs block">
+                              प्रत्येक PDF दाखल्याचे स्वतंत्र पेमेंट नियंत्रण (Per-Document Pricing):
+                            </span>
+                            <span className="text-[11px] text-slate-500">
+                              प्रत्येक दाखल्यासाठी ग्राहक / ऑपरेटरकडून आकारायची स्वतंत्र फी खाली सेट करा.
+                            </span>
+                          </div>
+                          <span className="px-2 py-0.5 bg-emerald-100 text-emerald-800 text-[10px] font-black rounded-md">
+                            ५ दाखल्यांचे दर
+                          </span>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+                          {/* 1. ST Caste */}
+                          <div className="p-2.5 bg-white rounded-xl border border-emerald-200 shadow-2xs flex items-center justify-between">
+                            <div>
+                              <div className="text-xs font-black text-slate-800">१. ST जात प्रमाणपत्र व वंशावळ</div>
+                              <div className="text-[10px] text-slate-400">६ पाने संपूर्ण संच</div>
+                            </div>
+                            <div className="flex items-center gap-1 font-bold">
+                              <span className="text-slate-400 font-mono text-xs">₹</span>
+                              <input
+                                type="number"
+                                min="1"
+                                max="500"
+                                value={draft.payment.docFees?.stCasteFee ?? 20}
+                                onChange={(e) =>
+                                  setDraft((prev) => ({
+                                    ...prev,
+                                    payment: {
+                                      ...prev.payment,
+                                      docFees: {
+                                        ...(prev.payment.docFees || { stCasteFee: 20, obcScFee: 20, incomeFee: 10, selfDeclFee: 10, panCardFee: 15 }),
+                                        stCasteFee: Math.max(1, parseInt(e.target.value) || 20)
+                                      }
+                                    }
+                                  }))
+                                }
+                                className="w-16 px-1.5 py-1 text-center font-mono font-black text-xs border border-emerald-300 rounded-lg bg-emerald-50/50"
+                              />
+                            </div>
+                          </div>
+
+                          {/* 2. Income */}
+                          <div className="p-2.5 bg-white rounded-xl border border-emerald-200 shadow-2xs flex items-center justify-between">
+                            <div>
+                              <div className="text-xs font-black text-slate-800">२. उत्पन्नाचा दाखला अर्ज</div>
+                              <div className="text-[10px] text-slate-400">प्रपत्र-अ मिळकत घोषणापत्र</div>
+                            </div>
+                            <div className="flex items-center gap-1 font-bold">
+                              <span className="text-slate-400 font-mono text-xs">₹</span>
+                              <input
+                                type="number"
+                                min="1"
+                                max="500"
+                                value={draft.payment.docFees?.incomeFee ?? 10}
+                                onChange={(e) =>
+                                  setDraft((prev) => ({
+                                    ...prev,
+                                    payment: {
+                                      ...prev.payment,
+                                      docFees: {
+                                        ...(prev.payment.docFees || { stCasteFee: 20, obcScFee: 20, incomeFee: 10, selfDeclFee: 10, panCardFee: 15 }),
+                                        incomeFee: Math.max(1, parseInt(e.target.value) || 10)
+                                      }
+                                    }
+                                  }))
+                                }
+                                className="w-16 px-1.5 py-1 text-center font-mono font-black text-xs border border-emerald-300 rounded-lg bg-emerald-50/50"
+                              />
+                            </div>
+                          </div>
+
+                          {/* 3. OBC */}
+                          <div className="p-2.5 bg-white rounded-xl border border-emerald-200 shadow-2xs flex items-center justify-between">
+                            <div>
+                              <div className="text-xs font-black text-slate-800">३. OBC / SC जात प्रमाणपत्र</div>
+                              <div className="text-[10px] text-slate-400">७ पाने संच</div>
+                            </div>
+                            <div className="flex items-center gap-1 font-bold">
+                              <span className="text-slate-400 font-mono text-xs">₹</span>
+                              <input
+                                type="number"
+                                min="1"
+                                max="500"
+                                value={draft.payment.docFees?.obcScFee ?? 20}
+                                onChange={(e) =>
+                                  setDraft((prev) => ({
+                                    ...prev,
+                                    payment: {
+                                      ...prev.payment,
+                                      docFees: {
+                                        ...(prev.payment.docFees || { stCasteFee: 20, obcScFee: 20, incomeFee: 10, selfDeclFee: 10, panCardFee: 15 }),
+                                        obcScFee: Math.max(1, parseInt(e.target.value) || 20)
+                                      }
+                                    }
+                                  }))
+                                }
+                                className="w-16 px-1.5 py-1 text-center font-mono font-black text-xs border border-emerald-300 rounded-lg bg-emerald-50/50"
+                              />
+                            </div>
+                          </div>
+
+                          {/* 4. Self Declarations */}
+                          <div className="p-2.5 bg-white rounded-xl border border-emerald-200 shadow-2xs flex items-center justify-between">
+                            <div>
+                              <div className="text-xs font-black text-slate-800">४. १६ विविध शासकीय स्वघोषणापत्रे</div>
+                              <div className="text-[10px] text-slate-400">रहिवास, विधवा, विभक्त इ.</div>
+                            </div>
+                            <div className="flex items-center gap-1 font-bold">
+                              <span className="text-slate-400 font-mono text-xs">₹</span>
+                              <input
+                                type="number"
+                                min="1"
+                                max="500"
+                                value={draft.payment.docFees?.selfDeclFee ?? 10}
+                                onChange={(e) =>
+                                  setDraft((prev) => ({
+                                    ...prev,
+                                    payment: {
+                                      ...prev.payment,
+                                      docFees: {
+                                        ...(prev.payment.docFees || { stCasteFee: 20, obcScFee: 20, incomeFee: 10, selfDeclFee: 10, panCardFee: 15 }),
+                                        selfDeclFee: Math.max(1, parseInt(e.target.value) || 10)
+                                      }
+                                    }
+                                  }))
+                                }
+                                className="w-16 px-1.5 py-1 text-center font-mono font-black text-xs border border-emerald-300 rounded-lg bg-emerald-50/50"
+                              />
+                            </div>
+                          </div>
+
+                          {/* 5. PAN Card Form */}
+                          <div className="p-2.5 bg-white rounded-xl border border-emerald-200 shadow-2xs flex items-center justify-between">
+                            <div>
+                              <div className="text-xs font-black text-slate-800">५. पॅन कार्ड अर्ज (२-पानी Form)</div>
+                              <div className="text-[10px] text-slate-400">Form 49A / Correction CR01</div>
+                            </div>
+                            <div className="flex items-center gap-1 font-bold">
+                              <span className="text-slate-400 font-mono text-xs">₹</span>
+                              <input
+                                type="number"
+                                min="1"
+                                max="500"
+                                value={draft.payment.docFees?.panCardFee ?? 15}
+                                onChange={(e) =>
+                                  setDraft((prev) => ({
+                                    ...prev,
+                                    payment: {
+                                      ...prev.payment,
+                                      docFees: {
+                                        ...(prev.payment.docFees || { stCasteFee: 20, obcScFee: 20, incomeFee: 10, selfDeclFee: 10, panCardFee: 15 }),
+                                        panCardFee: Math.max(1, parseInt(e.target.value) || 15)
+                                      }
+                                    }
+                                  }))
+                                }
+                                className="w-16 px-1.5 py-1 text-center font-mono font-black text-xs border border-emerald-300 rounded-lg bg-emerald-50/50"
+                              />
+                            </div>
+                          </div>
+
+                          {/* 6. Default fallback fee */}
+                          <div className="p-2.5 bg-white rounded-xl border border-slate-200 shadow-2xs flex items-center justify-between">
+                            <div>
+                              <div className="text-xs font-black text-slate-800">सर्वसाधारण / इतर पृष्ठ फी</div>
+                              <div className="text-[10px] text-slate-400">डीफॉल्ट प्रति पृष्ठ दर</div>
+                            </div>
+                            <div className="flex items-center gap-1 font-bold">
+                              <span className="text-slate-400 font-mono text-xs">₹</span>
+                              <input
+                                type="number"
+                                min="1"
+                                max="500"
+                                value={draft.payment.perPageFee || 10}
+                                onChange={(e) =>
+                                  setDraft((prev) => ({
+                                    ...prev,
+                                    payment: {
+                                      ...prev.payment,
+                                      perPageFee: Math.max(1, parseInt(e.target.value) || 10)
+                                    }
+                                  }))
+                                }
+                                className="w-16 px-1.5 py-1 text-center font-mono font-black text-xs border border-slate-300 rounded-lg bg-slate-50"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   {/* Anti-Theft & Copy Protection */}
@@ -954,182 +1079,170 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                     </div>
                   </div>
 
-                  {/* Fees Configuration - 4 Plans */}
-                  <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-3">
-                    <h5 className="font-extrabold text-xs text-slate-800 uppercase tracking-wider">
-                      सबस्क्रिप्शन प्लॅन्सचे दर नियंत्रण (Subscription Pricing)
-                    </h5>
 
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                      <div>
-                        <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                          मासिक (Monthly)
-                        </label>
-                        <div className="relative">
-                          <span className="absolute left-2.5 top-1.5 text-slate-400 font-bold text-xs">₹</span>
-                          <input
-                            type="number"
-                            value={draft.payment.monthlyPlanPrice}
-                            onChange={(e) =>
-                              setDraft((prev) => ({
-                                ...prev,
-                                payment: { ...prev.payment, monthlyPlanPrice: parseInt(e.target.value) || 199 }
-                              }))
-                            }
-                            className="w-full pl-6 pr-2 py-1.5 text-xs font-bold border border-slate-300 rounded-lg font-mono"
-                          />
+                  {/* SHOP UPI QR CODE CONTROL (ON / OFF) */}
+                  <div className={`p-4 rounded-2xl border-2 transition-all space-y-3.5 ${
+                    draft.payment.enableShopQrPayment
+                      ? 'bg-gradient-to-r from-amber-500/10 via-orange-500/10 to-amber-500/10 border-amber-400'
+                      : 'bg-slate-50 border-slate-200'
+                  }`}>
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                      <div className="flex items-center gap-3">
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-black ${
+                          draft.payment.enableShopQrPayment
+                            ? 'bg-amber-500 text-slate-950 shadow-xs'
+                            : 'bg-slate-300 text-slate-600'
+                        }`}>
+                          <QrCode className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <div className="text-xs sm:text-sm font-black text-slate-900 flex items-center gap-2">
+                            <span>स्वतःचा UPI QR कोड पर्याय (Shop UPI QR Code)</span>
+                            <span className={`text-[10px] font-black px-2 py-0.5 rounded-full ${
+                              draft.payment.enableShopQrPayment
+                                ? 'bg-amber-500 text-slate-950'
+                                : 'bg-slate-400 text-white'
+                            }`}>
+                              {draft.payment.enableShopQrPayment ? '● चालू (ON)' : '○ बंद (OFF - फक्त Razorpay)'}
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-slate-600 mt-0.5 leading-relaxed">
+                            {draft.payment.enableShopQrPayment
+                              ? 'चालू असताना: ग्राहकांना थेट तुमच्या PhonePe/GPay QR वर पैसे पाठवण्याचा पर्याय दिसेल. (१२-अंकी UTR नंबर सक्तीचा राहील).'
+                              : 'बंद असताना: हा पर्याय पूर्णपणे बंद राहील आणि ग्राहक फक्त अधिकृत Razorpay नेच ऑटो-व्हेरीफाय पेमेंट करू शकतील (बिगर UTR प्रिंट रोखण्यासाठी हा पर्याय बंद ठेवावा!).'}
+                          </p>
                         </div>
                       </div>
 
-                      <div>
-                        <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                          त्रैमासिक (Quarterly)
-                        </label>
-                        <div className="relative">
-                          <span className="absolute left-2.5 top-1.5 text-slate-400 font-bold text-xs">₹</span>
-                          <input
-                            type="number"
-                            value={draft.payment.quarterlyPlanPrice || 499}
-                            onChange={(e) =>
-                              setDraft((prev) => ({
-                                ...prev,
-                                payment: { ...prev.payment, quarterlyPlanPrice: parseInt(e.target.value) || 499 }
-                              }))
-                            }
-                            className="w-full pl-6 pr-2 py-1.5 text-xs font-bold border border-slate-300 rounded-lg font-mono"
-                          />
-                        </div>
-                      </div>
-
-                      <div>
-                        <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                          वार्षिक (Yearly)
-                        </label>
-                        <div className="relative">
-                          <span className="absolute left-2.5 top-1.5 text-slate-400 font-bold text-xs">₹</span>
-                          <input
-                            type="number"
-                            value={draft.payment.yearlyPlanPrice}
-                            onChange={(e) =>
-                              setDraft((prev) => ({
-                                ...prev,
-                                payment: { ...prev.payment, yearlyPlanPrice: parseInt(e.target.value) || 1499 }
-                              }))
-                            }
-                            className="w-full pl-6 pr-2 py-1.5 text-xs font-bold border border-slate-300 rounded-lg font-mono"
-                          />
-                        </div>
-                      </div>
-
-                      <div>
-                        <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                          लाइफटाईम (Lifetime)
-                        </label>
-                        <div className="relative">
-                          <span className="absolute left-2.5 top-1.5 text-slate-400 font-bold text-xs">₹</span>
-                          <input
-                            type="number"
-                            value={draft.payment.lifetimePlanPrice || 2999}
-                            onChange={(e) =>
-                              setDraft((prev) => ({
-                                ...prev,
-                                payment: { ...prev.payment, lifetimePlanPrice: parseInt(e.target.value) || 2999 }
-                              }))
-                            }
-                            className="w-full pl-6 pr-2 py-1.5 text-xs font-bold border border-slate-300 rounded-lg font-mono"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* UPI Details */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-xs font-bold text-slate-800 mb-1">
-                        UPI ID (ज्यावर पैसे जमा होतील)
-                      </label>
-                      <input
-                        type="text"
-                        value={draft.payment.upiId}
-                        onChange={(e) =>
-                          setDraft((prev) => ({
-                            ...prev,
-                            payment: { ...prev.payment, upiId: e.target.value }
-                          }))
-                        }
-                        className="w-full text-xs font-mono font-bold px-3 py-2 border border-slate-300 rounded-xl"
-                        placeholder="उदा. mauliseva@upi किंवा 9822xxxxxx@ybl"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-bold text-slate-800 mb-1">
-                        खातेदाराचे नाव (Payee Name)
-                      </label>
-                      <input
-                        type="text"
-                        value={draft.payment.payeeName}
-                        onChange={(e) =>
-                          setDraft((prev) => ({
-                            ...prev,
-                            payment: { ...prev.payment, payeeName: e.target.value }
-                          }))
-                        }
-                        className="w-full text-xs font-bold px-3 py-2 border border-slate-300 rounded-xl"
-                        placeholder="उदा. माऊली डिजिटल सेवा केंद्र"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Custom QR Code Upload */}
-                  <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 flex flex-col sm:flex-row items-center gap-4">
-                    <div className="w-24 h-24 bg-white border-2 border-dashed border-slate-300 rounded-xl flex items-center justify-center overflow-hidden shrink-0">
-                      {draft.payment.customQrCodeUrl ? (
-                        <img
-                          src={draft.payment.customQrCodeUrl}
-                          alt="Custom QR"
-                          className="w-full h-full object-contain"
+                      <label className="relative inline-flex items-center cursor-pointer shrink-0 self-start sm:self-auto">
+                        <input
+                          type="checkbox"
+                          checked={draft.payment.enableShopQrPayment ?? false}
+                          onChange={(e) =>
+                            setDraft((prev) => ({
+                              ...prev,
+                              payment: {
+                                ...prev.payment,
+                                enableShopQrPayment: e.target.checked
+                              }
+                            }))
+                          }
+                          className="sr-only peer"
                         />
-                      ) : (
-                        <QrCode className="w-10 h-10 text-slate-400" />
-                      )}
+                        <div className="w-12 h-6 bg-slate-300 peer-focus:outline-hidden rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
+                      </label>
                     </div>
 
-                    <div className="flex-1 space-y-1.5 text-center sm:text-left">
-                      <div className="text-xs font-bold text-slate-900">
-                        तुमचा स्वतःचा PhonePe / GooglePay QR कोड लावा
-                      </div>
-                      <p className="text-[11px] text-slate-500">
-                        तुम्ही तुमच्या मूळ केंद्राचा QR फोटो अपलोड करू शकता जेणेकरून ग्राहक थेट तुमच्या खात्यावर स्कॅन करतील.
-                      </p>
-                      <div className="flex items-center gap-2 justify-center sm:justify-start pt-1">
-                        <label className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-900 text-white rounded-lg text-xs font-bold cursor-pointer hover:bg-slate-800">
-                          <Upload className="w-3.5 h-3.5" />
-                          <span>QR फोटो अपलोड करा</span>
+                    {/* QR Code details when ON */}
+                    {draft.payment.enableShopQrPayment && (
+                      <div className="pt-3 border-t border-amber-300/60 space-y-3 animate-fade-in">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          <div>
+                            <label className="block text-[11px] font-bold text-slate-800 mb-1">
+                              UPI ID (ज्यावर पैसे जमा होतील)
+                            </label>
+                            <input
+                              type="text"
+                              value={draft.payment.upiId}
+                              onChange={(e) =>
+                                setDraft((prev) => ({
+                                  ...prev,
+                                  payment: { ...prev.payment, upiId: e.target.value }
+                                }))
+                              }
+                              className="w-full text-xs font-mono font-bold px-3 py-1.5 border border-slate-300 rounded-lg bg-white"
+                              placeholder="उदा. mauliseva@upi किंवा 9822xxxxxx@ybl"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-[11px] font-bold text-slate-800 mb-1">
+                              खातेदाराचे नाव (Payee Name)
+                            </label>
+                            <input
+                              type="text"
+                              value={draft.payment.payeeName}
+                              onChange={(e) =>
+                                setDraft((prev) => ({
+                                  ...prev,
+                                  payment: { ...prev.payment, payeeName: e.target.value }
+                                }))
+                              }
+                              className="w-full text-xs font-bold px-3 py-1.5 border border-slate-300 rounded-lg bg-white"
+                              placeholder="उदा. माऊली डिजिटल सेवा केंद्र"
+                            />
+                          </div>
+                        </div>
+
+                        {/* Custom QR Code Upload */}
+                        <div className="p-3 bg-white rounded-xl border border-amber-200 flex flex-col sm:flex-row items-center gap-3">
+                          <div className="w-20 h-20 bg-slate-50 border-2 border-dashed border-slate-300 rounded-xl flex items-center justify-center overflow-hidden shrink-0">
+                            {draft.payment.customQrCodeUrl ? (
+                              <img
+                                src={draft.payment.customQrCodeUrl}
+                                alt="Custom QR"
+                                className="w-full h-full object-contain"
+                              />
+                            ) : (
+                              <QrCode className="w-8 h-8 text-slate-400" />
+                            )}
+                          </div>
+
+                          <div className="flex-1 space-y-1 text-center sm:text-left">
+                            <div className="text-xs font-bold text-slate-900">
+                              तुमचा मूळ PhonePe / GooglePay QR फोटो अपलोड करा
+                            </div>
+                            <div className="flex items-center gap-2 justify-center sm:justify-start pt-1">
+                              <label className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-slate-900 text-white rounded-lg text-xs font-bold cursor-pointer hover:bg-slate-800">
+                                <Upload className="w-3.5 h-3.5" />
+                                <span>QR फोटो निवडा</span>
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  onChange={handleQrUpload}
+                                  className="hidden"
+                                />
+                              </label>
+                              {draft.payment.customQrCodeUrl && (
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    setDraft((prev) => ({
+                                      ...prev,
+                                      payment: { ...prev.payment, customQrCodeUrl: '' }
+                                    }))
+                                  }
+                                  className="text-xs text-red-600 font-bold hover:underline"
+                                >
+                                  काढून टाका
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Strict UTR Check Toggle */}
+                        <label className="flex items-center gap-2 p-2.5 bg-amber-50 rounded-lg border border-amber-200 cursor-pointer">
                           <input
-                            type="file"
-                            accept="image/*"
-                            onChange={handleQrUpload}
-                            className="hidden"
-                          />
-                        </label>
-                        {draft.payment.customQrCodeUrl && (
-                          <button
-                            type="button"
-                            onClick={() =>
+                            type="checkbox"
+                            checked={draft.payment.requireStrictUtrVerification ?? true}
+                            onChange={(e) =>
                               setDraft((prev) => ({
                                 ...prev,
-                                payment: { ...prev.payment, customQrCodeUrl: '' }
+                                payment: {
+                                  ...prev.payment,
+                                  requireStrictUtrVerification: e.target.checked
+                                }
                               }))
                             }
-                            className="text-xs text-red-600 font-bold hover:underline"
-                          >
-                            काढून टाका
-                          </button>
-                        )}
+                            className="w-4 h-4 text-amber-600 rounded"
+                          />
+                          <span className="text-[11px] font-bold text-amber-950">
+                            १२-अंकी UTR नंबर सक्तीचा ठेवा (बिगर UTR किंवा १२ अंकांशिवाय प्रिंट सुरू होणार नाही)
+                          </span>
+                        </label>
                       </div>
-                    </div>
+                    )}
                   </div>
 
                   {/* Free Watermarked Print Toggle */}
@@ -1152,6 +1265,239 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                       पेमेंट न करणाऱ्यांना वॉटरमार्कसह मोफत प्रिव्ह्यू प्रिंट करू द्या (पर्याय सक्रिय)
                     </span>
                   </label>
+
+                  {/* Official Razorpay Payment Gateway Integration */}
+                  <div className="p-4 bg-gradient-to-r from-blue-50/90 via-indigo-50/90 to-blue-100/90 border-2 border-blue-400 rounded-2xl space-y-3.5">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-blue-200 pb-2.5">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-9 h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center font-black shadow-sm shrink-0">
+                          <CreditCard className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <span className="font-extrabold text-xs sm:text-sm text-blue-950 block">
+                            अधिकृत Razorpay पेमेंट गेटवे (Razorpay Integration)
+                          </span>
+                          <span className="text-[11px] text-blue-800">
+                            PhonePe, GPay, Paytm, कार्ड व नेटबँकिंगने १ सेकंदात ऑटो-व्हेरीफिकेशन (No UTR needed)
+                          </span>
+                        </div>
+                      </div>
+                      <label className="flex items-center gap-1.5 cursor-pointer bg-white px-3 py-1.5 rounded-xl border border-blue-300 shadow-2xs self-start sm:self-auto">
+                        <input
+                          type="checkbox"
+                          checked={draft.payment.razorpay?.enabled ?? false}
+                          onChange={(e) =>
+                            setDraft((prev) => ({
+                              ...prev,
+                              payment: {
+                                ...prev.payment,
+                                razorpay: {
+                                  enabled: e.target.checked,
+                                  keyId: prev.payment.razorpay?.keyId || '',
+                                  keySecret: prev.payment.razorpay?.keySecret || ''
+                                }
+                              }
+                            }))
+                          }
+                          className="w-4 h-4 text-blue-600 rounded"
+                        />
+                        <span className="text-xs font-black text-blue-950">Razorpay चालू करा</span>
+                      </label>
+                    </div>
+
+                    {draft.payment.razorpay?.enabled && (
+                      <div className="space-y-3 pt-1 animate-fade-in text-xs">
+                        <div>
+                          <label className="block text-[11px] font-bold text-slate-800 mb-1">
+                            Razorpay Key ID (API Key) *
+                          </label>
+                          <input
+                            type="text"
+                            value={draft.payment.razorpay?.keyId || ''}
+                            onChange={(e) =>
+                              setDraft((prev) => ({
+                                ...prev,
+                                payment: {
+                                  ...prev.payment,
+                                  razorpay: {
+                                    ...(prev.payment.razorpay || { enabled: true, keyId: '', keySecret: '' }),
+                                    keyId: e.target.value.trim()
+                                  }
+                                }
+                              }))
+                            }
+                            placeholder="उदा. rzp_live_xxxxxxxxxxxx किंवा rzp_test_xxxxxxxxxxxx"
+                            className="w-full text-xs font-mono font-bold px-3 py-2 border border-slate-300 rounded-lg bg-white text-slate-900"
+                          />
+                        </div>
+
+                        {draft.payment.razorpay?.keyId ? (
+                          <div className="p-2.5 bg-emerald-50 border border-emerald-300 rounded-xl text-emerald-900 text-xs font-bold flex items-center gap-2">
+                            <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
+                            <span>✓ Razorpay सक्रिय आहे! ग्राहकांना अधिकृत सुरक्षित चेकआउट विंडो थेट दिसेल.</span>
+                          </div>
+                        ) : (
+                          <div className="p-2.5 bg-amber-50 border border-amber-300 rounded-xl text-amber-900 text-xs font-bold flex items-center gap-2">
+                            <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
+                            <span>कृपया तुमचा Razorpay Key ID वरील बॉक्समध्ये टाका.</span>
+                          </div>
+                        )}
+
+                        {/* 3 Step Simple Instructions */}
+                        <div className="bg-white p-3 rounded-xl border border-blue-200 space-y-1.5 text-[11px] text-slate-700">
+                          <span className="font-extrabold text-blue-950 block text-xs">
+                            💡 Razorpay Key ID कसा मिळवावा? (अवघ्या २ मिनिटांत):
+                          </span>
+                          <ol className="list-decimal pl-4 space-y-1 leading-relaxed">
+                            <li>
+                              <b>razorpay.com</b> वर जाऊन तुमचे मोफत खाते (Free Account) उघडा.
+                            </li>
+                            <li>
+                              डॅशबोर्डमध्ये डाव्या बाजूला <b>Account & Settings → API Keys</b> वर क्लिक करा.
+                            </li>
+                            <li>
+                              <b>"Generate Key"</b> दाबा; तेथे मिळणारा <b>Key ID</b> (उदा. <code className="bg-slate-100 px-1 py-0.5 rounded text-blue-700 font-mono">rzp_live_...</code>) कॉपी करून वरील बॉक्समध्ये पेस्ट करा.
+                            </li>
+                          </ol>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Google AdSense Monetization Card */}
+                  <div className="p-4 bg-gradient-to-r from-amber-50/90 via-orange-50/90 to-amber-100/90 border-2 border-amber-400 rounded-2xl space-y-3.5">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-amber-200 pb-2.5">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-9 h-9 rounded-xl bg-amber-600 text-white flex items-center justify-center font-black shadow-sm shrink-0">
+                          <Globe className="w-5 h-5 text-white" />
+                        </div>
+                        <div>
+                          <div className="text-xs sm:text-sm font-black text-slate-900 flex items-center gap-2">
+                            <span>Google AdSense जाहिरात नियंत्रण (Google AdSense)</span>
+                            <span className={`text-[10px] font-black px-2 py-0.5 rounded-full ${
+                              draft.adsense?.enabled
+                                ? 'bg-amber-600 text-white shadow-2xs'
+                                : 'bg-slate-400 text-white'
+                            }`}>
+                              {draft.adsense?.enabled ? '● सक्रिय' : '○ बंद'}
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-slate-600">
+                            कस्टम डोमेन मंजूर झाल्यानंतर AdSense पब्लिशर आयडी टाका व जाहिराती सुरू करा.
+                          </p>
+                        </div>
+                      </div>
+
+                      <label className="relative inline-flex items-center cursor-pointer shrink-0">
+                        <input
+                          type="checkbox"
+                          checked={draft.adsense?.enabled ?? true}
+                          onChange={(e) =>
+                            setDraft((prev) => ({
+                              ...prev,
+                              adsense: {
+                                ...(prev.adsense || { enabled: true, publisherId: '', showTopBanner: true, showSidebarBanner: true, showBottomBanner: true }),
+                                enabled: e.target.checked
+                              }
+                            }))
+                          }
+                          className="sr-only peer"
+                        />
+                        <div className="w-12 h-6 bg-slate-300 peer-focus:outline-hidden rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-600"></div>
+                      </label>
+                    </div>
+
+                    {draft.adsense?.enabled && (
+                      <div className="space-y-3 pt-1 animate-fade-in text-xs">
+                        <div>
+                          <label className="block text-xs font-bold text-slate-800 mb-1">
+                            Google AdSense Publisher ID (Client ID):
+                          </label>
+                          <input
+                            type="text"
+                            value={draft.adsense?.publisherId || ''}
+                            onChange={(e) =>
+                              setDraft((prev) => ({
+                                ...prev,
+                                adsense: {
+                                  ...(prev.adsense || { enabled: true, publisherId: '', showTopBanner: true, showSidebarBanner: true, showBottomBanner: true }),
+                                  publisherId: e.target.value.trim()
+                                }
+                              }))
+                            }
+                            placeholder="उदा. ca-pub-1234567890123456"
+                            className="w-full text-xs font-mono font-bold px-3 py-2 border border-slate-300 rounded-lg bg-white text-slate-900"
+                          />
+                          <span className="text-[10px] text-slate-500 mt-0.5 block">
+                            (AdSense खात्यात मंजुरी मिळाल्यावर मिळणारा पब्लिशर आयडी येथे पेस्ट करा)
+                          </span>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1">
+                          <label className="flex items-center gap-2 p-2 bg-white rounded-lg border border-amber-200 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={draft.adsense?.showTopBanner ?? true}
+                              onChange={(e) =>
+                                setDraft((prev) => ({
+                                  ...prev,
+                                  adsense: {
+                                    ...(prev.adsense || { enabled: true, publisherId: '', showTopBanner: true, showSidebarBanner: true, showBottomBanner: true }),
+                                    showTopBanner: e.target.checked
+                                  }
+                                }))
+                              }
+                              className="w-4 h-4 text-amber-600 rounded"
+                            />
+                            <span className="text-[11px] font-bold text-slate-800">वरची जाहिरात (Top)</span>
+                          </label>
+
+                          <label className="flex items-center gap-2 p-2 bg-white rounded-lg border border-amber-200 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={draft.adsense?.showSidebarBanner ?? true}
+                              onChange={(e) =>
+                                setDraft((prev) => ({
+                                  ...prev,
+                                  adsense: {
+                                    ...(prev.adsense || { enabled: true, publisherId: '', showTopBanner: true, showSidebarBanner: true, showBottomBanner: true }),
+                                    showSidebarBanner: e.target.checked
+                                  }
+                                }))
+                              }
+                              className="w-4 h-4 text-amber-600 rounded"
+                            />
+                            <span className="text-[11px] font-bold text-slate-800">साइडबार जाहिरात</span>
+                          </label>
+
+                          <label className="flex items-center gap-2 p-2 bg-white rounded-lg border border-amber-200 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={draft.adsense?.showBottomBanner ?? true}
+                              onChange={(e) =>
+                                setDraft((prev) => ({
+                                  ...prev,
+                                  adsense: {
+                                    ...(prev.adsense || { enabled: true, publisherId: '', showTopBanner: true, showSidebarBanner: true, showBottomBanner: true }),
+                                    showBottomBanner: e.target.checked
+                                  }
+                                }))
+                              }
+                              className="w-4 h-4 text-amber-600 rounded"
+                            />
+                            <span className="text-[11px] font-bold text-slate-800">तळाची जाहिरात (Bottom)</span>
+                          </label>
+                        </div>
+
+                        <div className="p-2.5 bg-white/80 border border-amber-300 rounded-xl text-[11px] text-amber-950 flex items-center gap-2">
+                          <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
+                          <span>
+                            प्रिंट सुरक्षितता: शासकीय दाखल्यांची प्रिंट काढताना कोणत्याही जाहिराती कागदावर येणार नाहीत!
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
 
@@ -1990,6 +2336,31 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                           }))
                         }
                         className="flex-1 text-xs font-bold px-3 py-1.5 border border-slate-300 rounded-lg"
+                      />
+                    </div>
+
+                    <div className="p-3 bg-blue-50/80 rounded-xl border border-blue-200 flex items-center gap-3">
+                      <input
+                        type="checkbox"
+                        checked={draft.tabs.panFormEnabled ?? true}
+                        onChange={(e) =>
+                          setDraft((prev) => ({
+                            ...prev,
+                            tabs: { ...prev.tabs, panFormEnabled: e.target.checked }
+                          }))
+                        }
+                        className="w-4 h-4 text-blue-600 rounded"
+                      />
+                      <input
+                        type="text"
+                        value={draft.tabs.panFormLabel || '५. पॅन कार्ड (PAN) फोटो व सही पेस्ट'}
+                        onChange={(e) =>
+                          setDraft((prev) => ({
+                            ...prev,
+                            tabs: { ...prev.tabs, panFormLabel: e.target.value }
+                          }))
+                        }
+                        className="flex-1 text-xs font-bold px-3 py-1.5 border border-blue-300 rounded-lg bg-white"
                       />
                     </div>
                   </div>

@@ -17,6 +17,7 @@ import { VanshavalTreeEditorTab } from './components/LeftFormTabs/VanshavalTreeE
 import { SignaturesPhotoTab } from './components/LeftFormTabs/SignaturesPhotoTab';
 import { IncomeTab } from './components/LeftFormTabs/IncomeTab';
 import { SelfDeclarationsTab } from './components/LeftFormTabs/SelfDeclarationsTab';
+import { PanCardTab } from './components/LeftFormTabs/PanCardTab';
 
 import { Page1 } from './components/FormPreview/Page1';
 import { Page2 } from './components/FormPreview/Page2';
@@ -27,13 +28,17 @@ import { Page6 } from './components/FormPreview/Page6';
 import { IncomeForm } from './components/FormPreview/IncomeForm';
 import { OBCForm } from './components/FormPreview/OBCForm';
 import { SelfDeclarationForm } from './components/FormPreview/SelfDeclarationForm';
+import { PanCardForm } from './components/FormPreview/PanCardForm';
 
 import { AdminPanelModal } from './components/AdminPanelModal';
 import { AuthModal } from './components/AuthModal';
 import { PaymentModal } from './components/PaymentModal';
-import { PaidAccessGateModal } from './components/PaidAccessGateModal';
-import { SubscriptionModal } from './components/SubscriptionModal';
 import { SavedProfilesModal } from './components/SavedProfilesModal';
+import { PrivacyPolicyModal } from './components/LegalModals/PrivacyPolicyModal';
+import { TermsAndAboutModal } from './components/LegalModals/TermsAndAboutModal';
+import { SchemeGuidesModal } from './components/LegalModals/SchemeGuidesModal';
+import { AdSenseBanner } from './components/AdSenseBanner';
+import { Footer } from './components/Footer';
 import { SubscribedCenter } from './types/admin';
 
 import {
@@ -67,10 +72,10 @@ const DEFAULT_SUBSCRIBED_CENTERS: SubscribedCenter[] = [
   {
     id: 'MSK-1001',
     password: 'mauli@2024',
-    centerName: 'माऊली डिजिटल सेवा केंद्र पाथवे दिगर',
-    ownerName: 'प्रशांत रामदास भोये',
-    mobile: '9822000000',
-    village: 'पाथवे दिगर',
+    centerName: 'माऊली डिजिटल सेवा केंद्र पठावे दिगर',
+    ownerName: 'प्रशांत वाळू भोये',
+    mobile: '7083034607',
+    village: 'पठावे दिगर',
     taluka: 'बागलाण',
     district: 'नाशिक',
     plan: 'lifetime',
@@ -86,8 +91,8 @@ const DEFAULT_SUBSCRIBED_CENTERS: SubscribedCenter[] = [
 const DEFAULT_USER: UserProfile = {
   id: 'MSK-1001',
   centerId: 'MSK-1001',
-  name: 'प्रशांत रामदास भोये',
-  centerName: 'माऊली डिजिटल सेवा केंद्र',
+  name: 'प्रशांत वाळू भोये',
+  centerName: 'माऊली डिजिटल सेवा केंद्र (पठावे दिगर)',
   email: 'prashantbhoye098@gmail.com',
   photoUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80',
   isLoggedIn: true,
@@ -101,7 +106,56 @@ export default function App() {
   const [adminSettings, setAdminSettings] = useState<AdminSettings>(() => {
     try {
       const saved = localStorage.getItem(LOCAL_STORAGE_ADMIN_KEY);
-      return saved ? JSON.parse(saved) : DEFAULT_ADMIN_SETTINGS;
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        const merged: AdminSettings = {
+          ...DEFAULT_ADMIN_SETTINGS,
+          ...parsed,
+          tabs: {
+            ...DEFAULT_ADMIN_SETTINGS.tabs,
+            ...(parsed.tabs || {}),
+            panFormEnabled: parsed.tabs?.panFormEnabled ?? true,
+            panFormLabel: parsed.tabs?.panFormLabel || DEFAULT_ADMIN_SETTINGS.tabs.panFormLabel
+          },
+          payment: {
+            ...DEFAULT_ADMIN_SETTINGS.payment,
+            ...(parsed.payment || {}),
+            docFees: {
+              ...DEFAULT_ADMIN_SETTINGS.payment.docFees,
+              ...(parsed.payment?.docFees || {})
+            },
+            enableShopQrPayment: parsed.payment?.enableShopQrPayment ?? DEFAULT_ADMIN_SETTINGS.payment.enableShopQrPayment,
+            requireStrictUtrVerification: parsed.payment?.requireStrictUtrVerification ?? true,
+            razorpay: {
+              enabled: parsed.payment?.razorpay?.enabled ?? DEFAULT_ADMIN_SETTINGS.payment.razorpay?.enabled ?? true,
+              keyId: parsed.payment?.razorpay?.keyId || DEFAULT_ADMIN_SETTINGS.payment.razorpay?.keyId || 'rzp_test_TxBucNNFf7RzjN',
+              keySecret: parsed.payment?.razorpay?.keySecret || DEFAULT_ADMIN_SETTINGS.payment.razorpay?.keySecret || 'lRYJan90Xt97vqGtnkzVQVWe'
+            }
+          },
+          adsense: {
+            ...DEFAULT_ADMIN_SETTINGS.adsense,
+            ...(parsed.adsense || {})
+          },
+          branding: {
+            ...DEFAULT_ADMIN_SETTINGS.branding,
+            ...(parsed.branding || {}),
+            centerName: parsed.branding?.centerName && !parsed.branding.centerName.includes('पाथवे')
+              ? parsed.branding.centerName
+              : DEFAULT_ADMIN_SETTINGS.branding.centerName,
+            centerAddress: parsed.branding?.centerAddress && !parsed.branding.centerAddress.includes('पाथवे')
+              ? parsed.branding.centerAddress
+              : DEFAULT_ADMIN_SETTINGS.branding.centerAddress,
+            centerContact: parsed.branding?.centerContact && parsed.branding.centerContact !== '९८२२xxxxxx'
+              ? parsed.branding.centerContact
+              : DEFAULT_ADMIN_SETTINGS.branding.centerContact,
+            supportWhatsapp: parsed.branding?.supportWhatsapp && parsed.branding.supportWhatsapp !== '९८२२xxxxxx'
+              ? parsed.branding.supportWhatsapp
+              : DEFAULT_ADMIN_SETTINGS.branding.supportWhatsapp
+          }
+        };
+        return merged;
+      }
+      return DEFAULT_ADMIN_SETTINGS;
     } catch {
       return DEFAULT_ADMIN_SETTINGS;
     }
@@ -172,16 +226,11 @@ export default function App() {
   const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
-  const [isSubscriptionModalOpen, setIsSubscriptionModalOpen] = useState(false);
   const [isProfilesModalOpen, setIsProfilesModalOpen] = useState(false);
-
-  // 100% Paid Gatekeeper State
-  const [isPaidGateOpen, setIsPaidGateOpen] = useState<boolean>(() => {
-    if (adminSettings.payment.enforcePaidLogin) {
-      return !userProfile.isSubscribed;
-    }
-    return false;
-  });
+  const [isPrivacyModalOpen, setIsPrivacyModalOpen] = useState(false);
+  const [isTermsModalOpen, setIsTermsModalOpen] = useState(false);
+  const [termsDefaultTab, setTermsDefaultTab] = useState<'terms' | 'disclaimer' | 'about'>('terms');
+  const [isSchemeGuidesModalOpen, setIsSchemeGuidesModalOpen] = useState(false);
 
   // Anti-Theft & Copy Protection Listeners
   useEffect(() => {
@@ -267,6 +316,7 @@ export default function App() {
   const getTotalPages = (category: FormCategory): number => {
     if (category === 'ST_CASTE') return 6;
     if (category === 'OBC_SC_CASTE') return 7;
+    if (category === 'PAN_CARD_49A') return 2;
     return 1;
   };
 
@@ -345,6 +395,8 @@ export default function App() {
       setActiveTab('income');
     } else if (category === 'SELF_DECLARATIONS_16') {
       setActiveTab('self_decl');
+    } else if (category === 'PAN_CARD_49A') {
+      setActiveTab('pan_card');
     } else {
       setActiveTab('applicant');
     }
@@ -439,6 +491,13 @@ export default function App() {
       { key: 'applicant', label: adminSettings.tabs.tabApplicant || '१. अर्जदार', icon: User }
     ];
 
+    if (formData.activeFormCategory === 'PAN_CARD_49A') {
+      return [
+        { key: 'pan_card', label: adminSettings.tabs.tabPanCard || 'PAN फोटो व सही', icon: FileCheck },
+        { key: 'center', label: adminSettings.tabs.tabCenter || 'केंद्र व माहिती', icon: Building2 }
+      ];
+    }
+
     if (formData.activeFormCategory === 'INCOME_DECLARATION') {
       return [
         ...commonStart,
@@ -485,11 +544,11 @@ export default function App() {
           onPrintAll={() => handlePrintRequest(true)}
           onLoadDemo={handleLoadDemo}
           onReset={handleReset}
-          onOpenSubscription={() => setIsSubscriptionModalOpen(true)}
           onOpenProfiles={() => setIsProfilesModalOpen(true)}
           onOpenAdmin={() => setIsAdminModalOpen(true)}
           onOpenAuth={() => setIsAuthModalOpen(true)}
           onOpenPayment={() => setIsPaymentModalOpen(true)}
+          onOpenGuides={() => setIsSchemeGuidesModalOpen(true)}
           currentCategory={formData.activeFormCategory}
           onSelectCategory={handleCategoryChange}
           currentPage={activePagePreview}
@@ -519,6 +578,11 @@ export default function App() {
             </div>
           </div>
         )}
+
+        {/* Top Google AdSense Leaderboard Banner (Admin Controllable) */}
+        <div className="max-w-[1750px] w-full mx-auto px-2 sm:px-4">
+          <AdSenseBanner adminSettings={adminSettings} position="top" />
+        </div>
 
         {/* Two-Column Form Builder & Live Preview */}
         <main className="flex-1 flex flex-col lg:flex-row overflow-hidden max-w-[1750px] w-full mx-auto">
@@ -578,6 +642,21 @@ export default function App() {
               {activeTab === 'self_decl' && (
                 <SelfDeclarationsTab data={formData} onChange={updateFormData} />
               )}
+              {activeTab === 'pan_card' && (
+                <PanCardTab
+                  data={formData}
+                  onChange={updateFormData}
+                  onRequestPrint={() => handlePrintRequest(true)}
+                  isPaymentActive={adminSettings.payment.isPaymentSystemActive}
+                  isPaid={hasPaidCurrentDoc || !adminSettings.payment.isPaymentSystemActive}
+                  onRequirePayment={() => setIsPaymentModalOpen(true)}
+                />
+              )}
+            </div>
+
+            {/* Sidebar Google AdSense Banner (Admin Controllable) */}
+            <div className="px-3 shrink-0">
+              <AdSenseBanner adminSettings={adminSettings} position="sidebar" />
             </div>
 
             {/* Bottom Actions Bar */}
@@ -613,6 +692,7 @@ export default function App() {
                   {formData.activeFormCategory === 'OBC_SC_CASTE' && 'OBC / SC / VJNT - ७ पृष्ठे'}
                   {formData.activeFormCategory === 'INCOME_DECLARATION' && 'उत्पन्न प्रपत्र-अ'}
                   {formData.activeFormCategory === 'SELF_DECLARATIONS_16' && formData.activeSelfDeclarationType}
+                  {formData.activeFormCategory === 'PAN_CARD_49A' && 'पॅन कार्ड (PAN) २-पानी फॉर्म'}
                 </span>
 
                 {/* Watermark Status Pill */}
@@ -793,6 +873,22 @@ export default function App() {
                     <SelfDeclarationForm data={formData} onUpdate={updateFormData} />
                   </div>
                 )}
+
+                {/* 5. पॅन कार्ड (PAN Form 49A) २-पानी फोटो व सही */}
+                {formData.activeFormCategory === 'PAN_CARD_49A' && (
+                  <>
+                    {(activePagePreview === 0 || activePagePreview === 1) && (
+                      <div className="a4-container">
+                        <PanCardForm data={formData} pageNumber={1} />
+                      </div>
+                    )}
+                    {(activePagePreview === 0 || activePagePreview === 2) && (
+                      <div className="a4-container">
+                        <PanCardForm data={formData} pageNumber={2} />
+                      </div>
+                    )}
+                  </>
+                )}
               </div>
 
               {/* Bottom Notice */}
@@ -802,6 +898,30 @@ export default function App() {
             </div>
           </div>
         </main>
+
+        {/* Bottom Google AdSense Leaderboard Banner */}
+        <div className="max-w-[1750px] w-full mx-auto px-2 sm:px-4 py-1">
+          <AdSenseBanner adminSettings={adminSettings} position="bottom" />
+        </div>
+
+        {/* Google AdSense Compliance Footer */}
+        <Footer
+          adminSettings={adminSettings}
+          onOpenPrivacy={() => setIsPrivacyModalOpen(true)}
+          onOpenTerms={() => {
+            setTermsDefaultTab('terms');
+            setIsTermsModalOpen(true);
+          }}
+          onOpenDisclaimer={() => {
+            setTermsDefaultTab('disclaimer');
+            setIsTermsModalOpen(true);
+          }}
+          onOpenAbout={() => {
+            setTermsDefaultTab('about');
+            setIsTermsModalOpen(true);
+          }}
+          onOpenGuides={() => setIsSchemeGuidesModalOpen(true)}
+        />
       </div>
 
       {/* DEDICATED PURE PRINT PORTAL (Active ONLY during browser print) */}
@@ -844,6 +964,17 @@ export default function App() {
             <SelfDeclarationForm data={formData} onUpdate={updateFormData} />
           </div>
         )}
+
+        {formData.activeFormCategory === 'PAN_CARD_49A' && (
+          (printTarget === 'single' && activePagePreview !== 0
+            ? [activePagePreview]
+            : [1, 2]
+          ).map((pageNum) => (
+            <div key={pageNum} className="print-sheet">
+              <PanCardForm data={formData} pageNumber={pageNum as 1 | 2} />
+            </div>
+          ))
+        )}
       </div>
 
       {/* Master Admin Panel Modal */}
@@ -863,61 +994,22 @@ export default function App() {
         onClose={() => setIsAuthModalOpen(false)}
         user={userProfile}
         onUpdateUser={(updated) => setUserProfile((prev) => ({ ...prev, ...updated }))}
-        onOpenSubscription={() => setIsSubscriptionModalOpen(true)}
         onOpenPayment={() => setIsPaymentModalOpen(true)}
       />
 
-      {/* Payment & Watermark Unlock Modal (₹10/page) */}
+      {/* Payment & Watermark Unlock Modal (Per-Document Specific Pricing) */}
       <PaymentModal
         isOpen={isPaymentModalOpen}
         onClose={() => setIsPaymentModalOpen(false)}
         user={userProfile}
         adminSettings={adminSettings}
+        currentCategory={formData.activeFormCategory}
         pageCount={printTarget === 'single' ? 1 : totalPages}
         onUnlockWatermarkForPrint={() => {
           setHasPaidCurrentDoc(true);
           setTimeout(() => {
             executePrint(printTarget === 'all');
           }, 350);
-        }}
-      />
-
-      {/* 100% Paid Portal Gatekeeper & Member Registration Modal */}
-      <PaidAccessGateModal
-        isOpen={isPaidGateOpen}
-        onClose={() => {
-          if (!adminSettings.payment.enforcePaidLogin) {
-            setIsPaidGateOpen(false);
-          }
-        }}
-        adminSettings={adminSettings}
-        subscribedCenters={subscribedCenters}
-        onAddSubscribedCenter={(newCenter) => {
-          setSubscribedCenters((prev) => [newCenter, ...prev]);
-        }}
-        onLoginSuccess={(userData, isAdmin) => {
-          setUserProfile((prev) => ({
-            ...prev,
-            ...userData,
-            isLoggedIn: true,
-            isSubscribed: true
-          }));
-          setIsPaidGateOpen(false);
-          setHasPaidCurrentDoc(true);
-          if (isAdmin) {
-            setIsAdminModalOpen(true);
-          }
-        }}
-      />
-
-      {/* Subscription Plans Modal */}
-      <SubscriptionModal
-        isOpen={isSubscriptionModalOpen}
-        onClose={() => setIsSubscriptionModalOpen(false)}
-        activePlan={userProfile.plan === 'free' ? 'yearly' : (userProfile.plan as 'monthly' | 'yearly')}
-        onSelectPlan={(plan) => {
-          setUserProfile((prev) => ({ ...prev, plan }));
-          setHasPaidCurrentDoc(true);
         }}
       />
 
@@ -930,6 +1022,29 @@ export default function App() {
         onSaveProfile={handleSaveVillageProfile}
         onDeleteProfile={handleDeleteVillageProfile}
         onApplyProfile={handleApplyVillageProfile}
+      />
+
+      {/* Google AdSense Compliance & Legal Modals */}
+      <PrivacyPolicyModal
+        isOpen={isPrivacyModalOpen}
+        onClose={() => setIsPrivacyModalOpen(false)}
+        adminSettings={adminSettings}
+      />
+
+      <TermsAndAboutModal
+        isOpen={isTermsModalOpen}
+        onClose={() => setIsTermsModalOpen(false)}
+        adminSettings={adminSettings}
+        defaultTab={termsDefaultTab}
+      />
+
+      <SchemeGuidesModal
+        isOpen={isSchemeGuidesModalOpen}
+        onClose={() => setIsSchemeGuidesModalOpen(false)}
+        onSelectFormCategory={(cat) => {
+          handleCategoryChange(cat as any);
+          setIsSchemeGuidesModalOpen(false);
+        }}
       />
     </>
   );

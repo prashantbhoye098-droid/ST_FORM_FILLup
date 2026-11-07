@@ -70,20 +70,40 @@ export const IncomeForm: React.FC<IncomeFormProps> = ({ data }) => {
         </div>
 
         {/* Official Header Box matching Attachment 1 */}
-        <div className="border border-slate-900 p-2 text-center text-xs mb-3 font-semibold bg-slate-50/50">
+        <div className="border-2 border-slate-900 rounded-lg p-2 text-center text-xs mb-3 font-semibold bg-white">
           <div>(माहिती तंत्रज्ञान (सा.प्र.वि)</div>
           <div>(शासन निर्णय क्र. प्रसुधा १६१४/३४५/प्र.क्र.०१/१८/अ मंत्रालय-मुंबई ४०००३२ दि. ०९ मार्च २०१५)</div>
         </div>
 
-        {/* Title */}
-        <div className="text-center font-bold mb-3">
-          <div className="text-base tracking-wide font-extrabold">प्रपत्र-अ (Annexure-A)</div>
-          <div className="text-base font-extrabold underline mt-0.5">
-            मिळकती बाबत स्वघोषणा पत्र (Income Declaration)
+        {/* Title & Photo Box matching Annexure-A PDF */}
+        <div className="flex items-center justify-between mb-3 min-h-[125px]">
+          <div className="flex-1 text-center pr-2">
+            <div className="text-base tracking-wide font-extrabold text-slate-950">प्रपत्र-अ (Annexure-A)</div>
+            <div className="text-xl font-black text-slate-950 mt-1">
+              मिळकती बाबत स्वयंघोषणा पत्र
+            </div>
+            <div className="text-[11px] text-slate-600 font-semibold mt-0.5">
+              (Income Declaration for Income Certificate)
+            </div>
+          </div>
+
+          {/* Official Rounded Photo Box matching PDF 1 */}
+          <div className="w-[105px] h-[125px] border-2 border-slate-900 rounded-2xl bg-slate-50 flex flex-col items-center justify-center p-1 text-center shrink-0 shadow-2xs">
+            {data.applicantPhotoUrl ? (
+              <img
+                src={data.applicantPhotoUrl}
+                alt="Applicant"
+                className="w-full h-full object-cover rounded-xl"
+              />
+            ) : (
+              <div className="text-slate-400 font-bold text-[10px] leading-tight">
+                येथे फोटो<br />चिकटवा<br />(Photo)
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Declaration Paragraph */}
+        {/* Declaration Paragraph matching PDF 1 */}
         <div className="text-justify text-xs sm:text-[13px] leading-loose mb-3">
           मी अर्जदार श्री./श्रीमती/कु.{' '}
           <span className="font-bold border-b border-dotted border-slate-800 px-1 text-slate-950">

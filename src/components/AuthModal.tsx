@@ -7,7 +7,7 @@ interface AuthModalProps {
   onClose: () => void;
   user: UserProfile;
   onUpdateUser: (updated: Partial<UserProfile>) => void;
-  onOpenSubscription: () => void;
+  onOpenSubscription?: () => void;
   onOpenPayment: () => void;
 }
 
@@ -29,7 +29,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     // Simulated instant Google OAuth sign-in flow
     onUpdateUser({
       isLoggedIn: true,
-      name: operatorName || 'प्रशांत रामदास भोये',
+      name: operatorName || 'प्रशांत वाळू भोये',
       email: operatorEmail || 'prashantbhoye098@gmail.com',
       photoUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80'
     });
@@ -172,11 +172,15 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     type="button"
                     onClick={() => {
                       onClose();
-                      onOpenSubscription();
+                      if (onOpenSubscription) {
+                        onOpenSubscription();
+                      } else {
+                        onOpenPayment();
+                      }
                     }}
                     className="text-[11px] font-bold text-amber-700 hover:text-amber-900 underline mt-1.5 block cursor-pointer"
                   >
-                    अपग्रेड करा →
+                    पेमेंट / रिचार्ज करा →
                   </button>
                 </div>
 
@@ -269,7 +273,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         <div className="bg-slate-100 p-4 border-t border-slate-200 flex justify-between items-center text-xs text-slate-600">
           <div className="flex items-center gap-1.5">
             <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-            <span>माऊली डिजिटल सेवा केंद्र पाथवे दिगर</span>
+            <span>माऊली डिजिटल सेवा केंद्र पठावे दिगर</span>
           </div>
           <button
             type="button"

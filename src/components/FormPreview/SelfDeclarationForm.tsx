@@ -19,7 +19,12 @@ export const SelfDeclarationForm: React.FC<SelfDeclarationFormProps> = ({ data }
     ? `${data.fatherNameAsGuardian || data.fatherName || 'पालक'}`
     : data.applicantName || 'अर्जदार';
 
-  const relationWord = data.gender === 'स्त्री' ? 'मुलगी' : 'मुलगा';
+  const relationWord =
+    (data.gender as string) === 'स्त्री'
+      ? 'यांची मुलगी'
+      : (data.gender as string) === 'पत्नी'
+      ? 'यांची पत्नी'
+      : 'यांचा मुलगा';
 
   return (
     <div className="a4-page p-10 sm:p-14 text-xs leading-relaxed relative flex flex-col justify-between border-2 border-dashed border-slate-900 print:border-2 print:border-dashed print:border-slate-900 print:shadow-none print:p-8 bg-white m-auto overflow-hidden">

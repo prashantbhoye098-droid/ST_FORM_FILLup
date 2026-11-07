@@ -85,8 +85,12 @@ export const PaidAccessGateModal: React.FC<PaidAccessGateModalProps> = ({
   const currentPlanAmount = planPrices[regPlan];
 
   // UPI payment intent URL
-  const upiUrl = `upi://pay?pa=${encodeURIComponent(adminSettings.payment.upiId || 'prashantbhoye098@oksbi')}&pn=${encodeURIComponent(adminSettings.payment.payeeName || 'माऊली डिजिटल सेवा केंद्र')}&am=${currentPlanAmount}&cu=INR&tn=${encodeURIComponent(`Portal-${regPlan}`)}`;
-  const qrCodeImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(upiUrl)}&margin=8`;
+  const upiUrl = adminSettings.payment.upiId
+    ? `upi://pay?pa=${encodeURIComponent(adminSettings.payment.upiId)}&pn=${encodeURIComponent(adminSettings.payment.payeeName || 'माऊली डिजिटल सेवा केंद्र')}&am=${currentPlanAmount}&cu=INR&tn=${encodeURIComponent(`Portal-${regPlan}`)}`
+    : '';
+  const qrCodeImageUrl = upiUrl
+    ? `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(upiUrl)}&margin=8`
+    : '';
 
   // Copy helper
   const handleCopy = (text: string, id: string) => {
@@ -218,7 +222,7 @@ export const PaidAccessGateModal: React.FC<PaidAccessGateModalProps> = ({
       centerName: regCenterName.trim(),
       ownerName: regOwnerName.trim(),
       mobile: regMobile.trim(),
-      village: regVillage.trim() || 'पाथवे',
+      village: regVillage.trim() || 'पठावे दिगर',
       taluka: regTaluka.trim() || 'बागलाण',
       district: regDistrict.trim() || 'नाशिक',
       plan: regPlan,
@@ -703,7 +707,7 @@ export const PaidAccessGateModal: React.FC<PaidAccessGateModalProps> = ({
                       <span>३. UPI QR कोड स्कॅन करून भरा: ₹{currentPlanAmount}</span>
                     </span>
                     <span className="text-[10px] bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded border border-emerald-500/30 font-mono">
-                      {adminSettings.payment.upiId || 'prashantbhoye098@oksbi'}
+                      {adminSettings.payment.upiId || 'संपर्क करा'}
                     </span>
                   </div>
 
