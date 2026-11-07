@@ -123,7 +123,7 @@ export const ApplicantTab: React.FC<ApplicantTabProps> = ({ data, onChange }) =>
               vanshaval: { ...data.vanshaval, applicant: val }
             });
           }}
-          placeholder="उदा. प्रशांत रामदास भोये"
+          placeholder="उदा. अर्जदाराचे पूर्ण नाव"
           className="w-full px-3 py-2 border border-slate-300 rounded-md bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500 text-slate-900 font-semibold"
         />
       </div>
@@ -174,7 +174,7 @@ export const ApplicantTab: React.FC<ApplicantTabProps> = ({ data, onChange }) =>
             type="text"
             value={data.village}
             onChange={(e) => onChange({ village: e.target.value })}
-            placeholder="उदा. अंबासन"
+            placeholder="उदा. गावाचे नाव"
             className="w-full px-2.5 py-1.5 border border-slate-300 rounded-md bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500 text-slate-900"
           />
         </div>
@@ -185,7 +185,7 @@ export const ApplicantTab: React.FC<ApplicantTabProps> = ({ data, onChange }) =>
             type="text"
             value={data.taluka}
             onChange={(e) => onChange({ taluka: e.target.value })}
-            placeholder="उदा. बागलाण"
+            placeholder="उदा. तालुक्याचे नाव"
             className="w-full px-2.5 py-1.5 border border-slate-300 rounded-md bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500 text-slate-900"
           />
         </div>
@@ -196,7 +196,7 @@ export const ApplicantTab: React.FC<ApplicantTabProps> = ({ data, onChange }) =>
             type="text"
             value={data.district}
             onChange={(e) => onChange({ district: e.target.value })}
-            placeholder="उदा. नाशिक"
+            placeholder="उदा. जिल्ह्याचे नाव"
             className="w-full px-2.5 py-1.5 border border-slate-300 rounded-md bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500 text-slate-900"
           />
         </div>
@@ -209,7 +209,7 @@ export const ApplicantTab: React.FC<ApplicantTabProps> = ({ data, onChange }) =>
           type="text"
           value={data.currentAddress}
           onChange={(e) => onChange({ currentAddress: e.target.value })}
-          placeholder="उदा. मु. पो. अंबासन, ता. बागलाण, जि. नाशिक"
+          placeholder="उदा. मु. पो. ..., ता. ..., जि. ..."
           className="w-full px-3 py-2 border border-slate-300 rounded-md bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500 text-slate-900"
         />
       </div>
@@ -220,7 +220,7 @@ export const ApplicantTab: React.FC<ApplicantTabProps> = ({ data, onChange }) =>
           type="text"
           value={data.postOffice}
           onChange={(e) => onChange({ postOffice: e.target.value })}
-          placeholder="उदा. अंबासन"
+          placeholder="उदा. पोस्ट ऑफिसचे नाव"
           className="w-full px-3 py-2 border border-slate-300 rounded-md bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500 text-slate-900"
         />
       </div>

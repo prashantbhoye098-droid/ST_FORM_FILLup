@@ -33,7 +33,8 @@ import {
   Building2,
   ExternalLink,
   Zap,
-  Globe
+  Globe,
+  Download
 } from 'lucide-react';
 
 interface AdminPanelModalProps {
@@ -1497,6 +1498,73 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                         </div>
                       </div>
                     )}
+                  </div>
+
+                  {/* HOSTINGER & DOMAIN DEPLOYMENT CARD */}
+                  <div className="p-4 bg-gradient-to-br from-purple-50 via-indigo-50 to-white rounded-2xl border-2 border-purple-300 shadow-sm space-y-3">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-b border-purple-200 pb-2">
+                      <div className="flex items-center gap-2">
+                        <div className="p-2 bg-purple-600 text-white rounded-xl shadow-xs">
+                          <Globe className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <h5 className="font-black text-sm text-purple-950 flex items-center gap-1.5">
+                            <span>Hostinger वर वेबसाईट अपलोड करा (mauliservices.in)</span>
+                            <span className="text-[10px] bg-purple-200 text-purple-900 px-2 py-0.5 rounded-full font-bold">
+                              Ready Bundle
+                            </span>
+                          </h5>
+                          <p className="text-[11px] text-purple-800">
+                            Hostinger वर अवघ्या २ मिनिटांत ही वेबसाईट लाईव्ह सुरू करण्यासाठी रेडी ZIP पॅकेज.
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-wrap items-center gap-2 shrink-0">
+                        <a
+                          href="/mauliservices-source-code.zip"
+                          download="mauliservices-source-code.zip"
+                          className="px-3 py-2 bg-slate-900 hover:bg-black text-white text-xs font-black rounded-xl shadow-md flex items-center gap-1.5 cursor-pointer transition-transform active:scale-95"
+                        >
+                          <Download className="w-4 h-4 text-emerald-400" />
+                          <span>GitHub Source Code ZIP (15 MB)</span>
+                        </a>
+
+                        <a
+                          href="/mauliservices-hostinger-bundle.zip"
+                          download="mauliservices-hostinger-bundle.zip"
+                          className="px-3 py-2 bg-purple-700 hover:bg-purple-800 text-white text-xs font-black rounded-xl shadow-md flex items-center gap-1.5 cursor-pointer transition-transform active:scale-95"
+                        >
+                          <Download className="w-4 h-4 text-amber-300" />
+                          <span>Hostinger Bundle ZIP (14 MB)</span>
+                        </a>
+                      </div>
+                    </div>
+
+                    {/* Step-by-Step Instructions */}
+                    <div className="bg-white/90 border border-purple-200 rounded-xl p-3 text-xs text-slate-800 space-y-2">
+                      <div className="font-bold text-purple-900 text-xs flex items-center gap-1.5">
+                        <CheckCircle className="w-4 h-4 text-emerald-600" />
+                        <span>Hostinger वर वेबसाईट कनेक्ट करण्याच्या ५ सोप्या पायऱ्या:</span>
+                      </div>
+                      <ol className="list-decimal list-inside space-y-1.5 text-[11px] text-slate-700 leading-relaxed font-medium">
+                        <li>
+                          <b>Hostinger hPanel</b> मध्ये लॉगिन करा आणि <b>Websites</b> मधून <b>mauliservices.in</b> उघडा.
+                        </li>
+                        <li>
+                          <b>File Manager (फाइल मॅनेजर)</b> वर क्लिक करा आणि <b>public_html</b> फोल्डर उघडा.
+                        </li>
+                        <li>
+                          वरील जांभळ्या बटनाने डाउनलोड केलेली <b>mauliservices-hostinger-bundle.zip</b> फाइल <b>public_html</b> मध्ये Upload करा.
+                        </li>
+                        <li>
+                          त्या ZIP फाइलवर राइट क्लिक करून <b>Extract (अनझिप)</b> करा. सर्व फाइल्स (`index.html`, `assets`, `.htaccess`, `ads.txt`) थेट `public_html` मध्ये दिसतील.
+                        </li>
+                        <li>
+                          Hostinger वर <b>SSL (HTTPS)</b> इन्स्टॉल करा. तुमची संपूर्ण वेबसाईट <b>https://mauliservices.in</b> वर लगेच चालू होईल!
+                        </li>
+                      </ol>
+                    </div>
                   </div>
                 </div>
               )}

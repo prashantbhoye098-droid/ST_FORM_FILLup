@@ -95,7 +95,7 @@ export const OtherAffidavitTab: React.FC<OtherAffidavitTabProps> = ({ data, onCh
             type="text"
             value={data.fatherAncestorOriginalVillage}
             onChange={(e) => onChange({ fatherAncestorOriginalVillage: e.target.value })}
-            placeholder="उदा. मु. पो. अंबासन, ता. बागलाण, जि. नाशिक"
+            placeholder="उदा. मु. पो. ..., ता. ..., जि. ..."
             className="w-full px-3 py-2 border border-slate-300 rounded-md bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500 text-slate-900 font-medium"
           />
         </div>
@@ -122,7 +122,7 @@ export const OtherAffidavitTab: React.FC<OtherAffidavitTabProps> = ({ data, onCh
               rows={2}
               value={data.relativeValidityDetails || ''}
               onChange={(e) => onChange({ relativeValidityDetails: e.target.value })}
-              placeholder="उदा. काका श्री. सोमनाथ यशवंत भोये यांना नाशिक पडताळणी समितीने दिलेले वैधता प्रमाणपत्र क्र. ६५४३/२०२१"
+              placeholder="उदा. नातेवाईकाचे वैधता प्रमाणपत्र क्र. व समितीचा तपशील"
               className="w-full px-3 py-2 border border-slate-300 rounded-md bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500 text-slate-900 text-xs"
             />
           </div>
@@ -196,7 +196,7 @@ export const OtherAffidavitTab: React.FC<OtherAffidavitTabProps> = ({ data, onCh
               type="text"
               value={data.relativeWithValidityName}
               onChange={(e) => onChange({ relativeWithValidityName: e.target.value })}
-              placeholder="उदा. सोमनाथ यशवंत भोये"
+              placeholder="उदा. नातेवाईकाचे नाव"
               className="w-full px-3 py-2 border border-slate-300 rounded-md bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500 text-slate-900"
             />
           </div>
@@ -223,7 +223,7 @@ export const OtherAffidavitTab: React.FC<OtherAffidavitTabProps> = ({ data, onCh
             type="text"
             value={data.witnessName}
             onChange={(e) => onChange({ witnessName: e.target.value })}
-            placeholder="उदा. ज्ञानेश्वर बाबुराव मोरे"
+            placeholder="उदा. साक्षीदाराचे पूर्ण नाव"
             className="w-full px-3 py-2 border border-slate-300 rounded-md bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500 text-slate-900 font-medium"
           />
         </div>
@@ -236,7 +236,7 @@ export const OtherAffidavitTab: React.FC<OtherAffidavitTabProps> = ({ data, onCh
             type="text"
             value={data.witnessAddress || ''}
             onChange={(e) => onChange({ witnessAddress: e.target.value })}
-            placeholder="उदा. रा. अंबासन, ता. बागलाण"
+            placeholder="उदा. मु. पो. ..., ता. ..."
             className="w-full px-3 py-2 border border-slate-300 rounded-md bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500 text-slate-900"
           />
         </div>

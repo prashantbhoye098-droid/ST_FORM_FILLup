@@ -79,7 +79,7 @@ export const SelfDeclarationsTab: React.FC<SelfDeclarationsTabProps> = ({ data, 
             type="text"
             value={data.applicantName || ''}
             onChange={(e) => onChange({ applicantName: e.target.value })}
-            placeholder="उदा. प्रशांत रामदास भोये"
+            placeholder="उदा. अर्जदाराचे पूर्ण नाव"
             className="w-full px-3 py-2 border border-slate-300 rounded-md bg-white font-semibold text-slate-900"
           />
         </div>
@@ -94,7 +94,7 @@ export const SelfDeclarationsTab: React.FC<SelfDeclarationsTabProps> = ({ data, 
             type="text"
             value={data.fatherName || ''}
             onChange={(e) => onChange({ fatherName: e.target.value })}
-            placeholder="उदा. रामदास यशवंत भोये"
+            placeholder="उदा. वडिलांचे / पतीचे पूर्ण नाव"
             className="w-full px-3 py-2 border border-amber-400 rounded-md bg-white font-bold text-slate-900 shadow-2xs focus:ring-2 focus:ring-amber-500"
           />
           <p className="text-[10px] text-amber-800 font-medium mt-1">

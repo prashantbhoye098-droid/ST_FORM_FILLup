@@ -17,7 +17,9 @@ import {
   FileText,
   Loader2,
   FileCheck2,
-  HelpCircle
+  HelpCircle,
+  Trash2,
+  ShieldCheck
 } from 'lucide-react';
 
 interface PanCardTabProps {
@@ -44,29 +46,41 @@ export const PanCardTab: React.FC<PanCardTabProps> = ({
 
   const isCorrection = data.panFormType === 'CORRECTION_CR01';
 
+  // Clear / Delete Uploaded PDF for Privacy
+  const handleClearPdf = () => {
+    onChange({
+      panPdfFileName: '',
+      panPdfBytes: undefined,
+      panPage1ImageUrl: '',
+      panPage2ImageUrl: '',
+      applicantPhotoUrl: '',
+      applicantSignatureUrl: ''
+    });
+  };
+
   // 1. Switch Form Mode: New PAN vs PAN Correction
   const handleSelectMode = (type: 'NEW_49A' | 'CORRECTION_CR01') => {
     if (type === 'CORRECTION_CR01') {
       onChange({
         panFormType: 'CORRECTION_CR01',
-        panPdfFileName: data.panPdfBytes ? data.panPdfFileName : 'Q026020627_PAN_Correction_CR01.pdf',
+        panPdfFileName: data.panPdfBytes ? data.panPdfFileName : '',
         panSignPage2X: 53.5,
         panSignPage2Y: 41.0,
         panSignPage2Width: 38.0,
         panSignPage2Height: 5.2,
-        panPage1ImageUrl: data.panPdfBytes ? data.panPage1ImageUrl : undefined,
-        panPage2ImageUrl: data.panPdfBytes ? data.panPage2ImageUrl : undefined
+        panPage1ImageUrl: data.panPdfBytes ? data.panPage1ImageUrl : '',
+        panPage2ImageUrl: data.panPdfBytes ? data.panPage2ImageUrl : ''
       });
     } else {
       onChange({
         panFormType: 'NEW_49A',
-        panPdfFileName: data.panPdfBytes ? data.panPdfFileName : 'A125752330_PAN_Form49A.pdf',
+        panPdfFileName: data.panPdfBytes ? data.panPdfFileName : '',
         panSignPage2X: 56.5,
         panSignPage2Y: 90.0,
         panSignPage2Width: 36.5,
         panSignPage2Height: 5.0,
-        panPage1ImageUrl: data.panPdfBytes ? data.panPage1ImageUrl : undefined,
-        panPage2ImageUrl: data.panPdfBytes ? data.panPage2ImageUrl : undefined
+        panPage1ImageUrl: data.panPdfBytes ? data.panPage1ImageUrl : '',
+        panPage2ImageUrl: data.panPdfBytes ? data.panPage2ImageUrl : ''
       });
     }
   };
@@ -162,17 +176,16 @@ export const PanCardTab: React.FC<PanCardTabProps> = ({
       return;
     }
 
+    if (!data.panPdfBytes) {
+      alert('कृपया आधी अर्जदाराचा २-पानी PAN PDF फॉर्म अपलोड करा. त्यानंतर त्यावर फोटो व सही आपोआप जोडून पूर्ण फाईल डाउनलोड होईल.');
+      return;
+    }
+
     try {
       setIsGeneratingPdf(true);
 
-      const defaultTemplate = isCorrection
-        ? '/assets/aistudio/Q026020627_c04f6533.pdf'
-        : '/assets/aistudio/A125752330_1f5c854d.pdf';
-
-      const pdfSource = data.panPdfBytes || defaultTemplate;
-
       const blob = await generatePanPdfWithOverlays({
-        pdfUrlOrBytes: pdfSource,
+        pdfUrlOrBytes: data.panPdfBytes,
         photoDataUrl: data.applicantPhotoUrl,
         signatureDataUrl: data.applicantSignatureUrl,
         crossSign: data.panCrossSignEnabled !== false,
@@ -316,16 +329,36 @@ export const PanCardTab: React.FC<PanCardTabProps> = ({
 
         <div>
           <span className="font-black text-indigo-950 text-xs block">
-            १. नवीन पॅन PDF फाईल अपलोड करा (Upload Any PAN PDF)
+            १. अर्जदाराचा PAN PDF फॉर्म अपलोड करा (Upload Any PAN PDF)
           </span>
-          <p className="text-[10px] text-indigo-900/80 mt-0.5">
-            सध्याची फाईल: <b className="font-mono text-indigo-950 underline">{data.panPdfFileName || (isCorrection ? 'Q026020627_Correction.pdf' : 'A125752330_Form49A.pdf')}</b>
-          </p>
+          {data.panPdfBytes ? (
+            <div className="mt-2 p-2 bg-emerald-100/90 border border-emerald-300 rounded-lg flex items-center justify-between text-left">
+              <div className="flex items-center gap-1.5 truncate max-w-[220px]">
+                <CheckCircle className="w-4 h-4 text-emerald-700 shrink-0" />
+                <span className="text-[11px] font-bold text-emerald-950 truncate">
+                  {data.panPdfFileName || 'PAN_Application.pdf'}
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={handleClearPdf}
+                className="px-2 py-1 bg-red-600 hover:bg-red-700 text-white text-[10px] font-bold rounded flex items-center gap-1 cursor-pointer transition-colors shadow-2xs"
+                title="ग्राहक डेटा सुरक्षिततेसाठी ही फाईल हटवा"
+              >
+                <Trash2 className="w-3 h-3" />
+                <span>फाईल हटवा (Clear)</span>
+              </button>
+            </div>
+          ) : (
+            <p className="text-[10px] text-indigo-900/80 mt-0.5">
+              सध्याची फाईल: <span className="text-slate-500 italic">कोणतीही फाईल निवडलेली नाही</span>
+            </p>
+          )}
         </div>
 
         <label className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-black text-xs rounded-lg cursor-pointer shadow-sm transition-all hover:scale-101">
           <Upload className="w-3.5 h-3.5" />
-          <span>{isLoadingPdf ? 'PDF लोड होत आहे...' : 'पॅन PDF फाईल निवडा (Auto-Detect)'}</span>
+          <span>{isLoadingPdf ? 'PDF लोड होत आहे...' : data.panPdfBytes ? 'दुसरी PDF बदला' : 'पॅन PDF फाईल निवडा (Auto-Detect)'}</span>
           <input
             type="file"
             accept="application/pdf"
@@ -334,9 +367,13 @@ export const PanCardTab: React.FC<PanCardTabProps> = ({
             className="hidden"
           />
         </label>
-        <p className="text-[10px] text-slate-500">
-          (नवीन पॅन असो वा करेक्शन फॉर्म, सिस्टीम दोन्ही पाने आपोआप ओळखते)
-        </p>
+        
+        <div className="p-2 bg-white/80 border border-indigo-200 rounded-lg text-[10px] text-slate-600 flex items-start gap-1.5 text-left">
+          <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
+          <span>
+            <b>ग्राहक गोपनीयता हमी:</b> अर्जदाराचा कोणताही वैयक्तिक डेटा किंवा PDF सर्व्हरवर सेव्ह केली जात नाही. सर्व प्रक्रिया थेट तुमच्या ब्राऊझरमध्ये तात्पुरती होते.
+          </span>
+        </div>
       </div>
 
       {/* STEP 2: PASSPORT PHOTO UPLOAD (Page 1 Left & Right Boxes) */}

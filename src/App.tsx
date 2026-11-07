@@ -178,7 +178,19 @@ export default function App() {
   const [formData, setFormData] = useState<STFormData>(() => {
     try {
       const saved = localStorage.getItem(LOCAL_STORAGE_FORM_KEY);
-      let base = saved ? JSON.parse(saved) : DEMO_FORM_DATA;
+      let base = saved ? JSON.parse(saved) : EMPTY_FORM_DATA;
+
+      // Privacy protection: purge any dummy names or addresses from local storage cache
+      if (
+        !base ||
+        base.applicantName?.includes('प्रशांत') ||
+        base.applicantName?.includes('भोये') ||
+        base.fatherName?.includes('भोये') ||
+        base.village?.includes('अंबासन') ||
+        base.vanshaval?.greatGreatGrandfather?.includes('भोये')
+      ) {
+        base = { ...EMPTY_FORM_DATA };
+      }
 
       // Merge permanent center profile if operator previously saved one
       const savedCenter = localStorage.getItem('permanent_center_profile_v4');
@@ -199,7 +211,7 @@ export default function App() {
       return base;
     } catch (e) {
       console.error('Failed to load local storage draft', e);
-      return DEMO_FORM_DATA;
+      return EMPTY_FORM_DATA;
     }
   });
 

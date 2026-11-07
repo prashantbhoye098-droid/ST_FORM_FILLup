@@ -59,7 +59,7 @@ export const Page4: React.FC<Page4Props> = ({ data }) => {
             <span className="font-bold border-b border-dotted border-slate-800 px-1">{data.district || 'नाशिक'}</span> राज्य महाराष्ट्र येथील रहिवासी असुन मी पुढीलप्रमाणे दृढपुर्वक कथन करतो / करते की, मी{' '}
             <span className="font-bold text-slate-950 border-b-2 border-slate-900 px-1.5 bg-slate-100">{data.tribeName || 'कोकणा'}</span> या अनुसूचित जमातीचा आहे. मी{' '}
             <span className="font-bold underline">{data.applicantReligion || 'हिंदू'}</span> धर्माचा आहे. माझे निवासाचे मुळ ठिकाण (अनुसूचित जमातीच्या अधिसूचनेच्या दिनांकास व दिनांकापुर्वी माझे / माझ्या पुर्वजांचे सर्वसाधारण निवासाचे ठिकाण{' '}
-            <span className="font-bold border-b border-dotted border-slate-800 px-1">{data.residence1950Place || data.originalVillage || `मु. पो. ${data.village || 'अंबासन'}`}</span> तहसिल{' '}
+            <span className="font-bold border-b border-dotted border-slate-800 px-1">{data.residence1950Place || data.originalVillage || (data.village ? `मु. पो. ${data.village}` : '_______________________')}</span> तहसिल{' '}
             <span className="font-bold border-b border-dotted border-slate-800 px-1">{data.originalTaluka || data.taluka || 'बागलाण'}</span> जिल्हा{' '}
             <span className="font-bold border-b border-dotted border-slate-800 px-1">{data.originalDistrict || data.district || 'नाशिक'}</span> हे आहे.
           </p>

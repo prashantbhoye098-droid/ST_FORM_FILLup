@@ -30,7 +30,7 @@ export const FamilyTribeTab: React.FC<FamilyTribeTabProps> = ({ data, onChange }
                 vanshaval: { ...data.vanshaval, father: val }
               });
             }}
-            placeholder="उदा. रामदास यशवंत भोये"
+            placeholder="उदा. वडिलांचे पूर्ण नाव"
             className="w-full px-3 py-2 border border-slate-300 rounded-md bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500 text-slate-900 font-semibold"
           />
         </div>
@@ -43,7 +43,7 @@ export const FamilyTribeTab: React.FC<FamilyTribeTabProps> = ({ data, onChange }
             type="text"
             value={data.fatherAddress}
             onChange={(e) => onChange({ fatherAddress: e.target.value })}
-            placeholder="उदा. मु. पो. अंबासन, ता. बागलाण, जि. नाशिक"
+            placeholder="उदा. मु. पो. ..., ता. ..., जि. ..."
             className="w-full px-3 py-2 border border-slate-300 rounded-md bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500 text-slate-900"
           />
         </div>
@@ -83,7 +83,7 @@ export const FamilyTribeTab: React.FC<FamilyTribeTabProps> = ({ data, onChange }
               type="text"
               value={data.fatherLastResidenceIfDeceased || ''}
               onChange={(e) => onChange({ fatherLastResidenceIfDeceased: e.target.value })}
-              placeholder="उदा. मु. पो. अंबासन, ता. बागलाण"
+              placeholder="उदा. मु. पो. ..., ता. ..."
               className="w-full px-3 py-2 border border-slate-300 rounded-md bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500 text-slate-900"
             />
           </div>
@@ -227,7 +227,7 @@ export const FamilyTribeTab: React.FC<FamilyTribeTabProps> = ({ data, onChange }
               type="text"
               value={data.originalVillage}
               onChange={(e) => onChange({ originalVillage: e.target.value })}
-              placeholder="उदा. अंबासन"
+              placeholder="उदा. गावाचे नाव"
               className="w-full px-2.5 py-1.5 border border-slate-300 rounded-md bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500 text-slate-900 font-medium"
             />
           </div>
@@ -238,7 +238,7 @@ export const FamilyTribeTab: React.FC<FamilyTribeTabProps> = ({ data, onChange }
               type="text"
               value={data.originalTaluka}
               onChange={(e) => onChange({ originalTaluka: e.target.value })}
-              placeholder="उदा. बागलाण"
+              placeholder="उदा. तालुक्याचे नाव"
               className="w-full px-2.5 py-1.5 border border-slate-300 rounded-md bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500 text-slate-900"
             />
           </div>
@@ -249,7 +249,7 @@ export const FamilyTribeTab: React.FC<FamilyTribeTabProps> = ({ data, onChange }
               type="text"
               value={data.originalDistrict}
               onChange={(e) => onChange({ originalDistrict: e.target.value })}
-              placeholder="उदा. नाशिक"
+              placeholder="उदा. जिल्ह्याचे नाव"
               className="w-full px-2.5 py-1.5 border border-slate-300 rounded-md bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500 text-slate-900"
             />
           </div>
@@ -263,7 +263,7 @@ export const FamilyTribeTab: React.FC<FamilyTribeTabProps> = ({ data, onChange }
             type="text"
             value={data.residence1950Place}
             onChange={(e) => onChange({ residence1950Place: e.target.value })}
-            placeholder="उदा. मु. पो. अंबासन, ता. बागलाण, जि. नाशिक"
+            placeholder="उदा. मु. पो. ..., ता. ..., जि. ..."
             className="w-full px-3 py-2 border border-slate-300 rounded-md bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500 text-slate-900"
           />
         </div>

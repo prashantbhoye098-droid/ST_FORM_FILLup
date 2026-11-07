@@ -86,7 +86,7 @@ export const VanshavalTreeEditorTab: React.FC<VanshavalTreeEditorTabProps> = ({ 
             type="text"
             value={v.greatGreatGrandfather}
             onChange={(e) => updateVanshavalField('greatGreatGrandfather', e.target.value)}
-            placeholder="उदा. धोंडू भोये"
+            placeholder="उदा. खापर पणजोबांचे नाव"
             className="w-full px-3 py-2 border border-slate-300 rounded-md bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500 text-slate-900 font-semibold"
           />
         </div>
@@ -100,7 +100,7 @@ export const VanshavalTreeEditorTab: React.FC<VanshavalTreeEditorTabProps> = ({ 
             type="text"
             value={v.greatGrandfather}
             onChange={(e) => updateVanshavalField('greatGrandfather', e.target.value)}
-            placeholder="उदा. लक्ष्मण धोंडू भोये"
+            placeholder="उदा. पणजोबांचे नाव"
             className="w-full px-3 py-2 border border-slate-300 rounded-md bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500 text-slate-900 font-semibold"
           />
         </div>
@@ -114,7 +114,7 @@ export const VanshavalTreeEditorTab: React.FC<VanshavalTreeEditorTabProps> = ({ 
             type="text"
             value={v.grandfather}
             onChange={(e) => updateVanshavalField('grandfather', e.target.value)}
-            placeholder="उदा. यशवंत लक्ष्मण भोये"
+            placeholder="उदा. आजोबांचे नाव"
             className="w-full px-3 py-2 border border-slate-300 rounded-md bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500 text-slate-900 font-semibold"
           />
         </div>
@@ -132,7 +132,7 @@ export const VanshavalTreeEditorTab: React.FC<VanshavalTreeEditorTabProps> = ({ 
               updateVanshavalField('father', val);
               onChange({ fatherName: val });
             }}
-            placeholder="उदा. रामदास यशवंत भोये"
+            placeholder="उदा. वडिलांचे पूर्ण नाव"
             className="w-full px-3 py-2 border border-slate-300 rounded-md bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500 text-slate-900 font-semibold"
           />
           <span className="text-[10px] text-slate-500 mt-0.5 block">
@@ -153,7 +153,7 @@ export const VanshavalTreeEditorTab: React.FC<VanshavalTreeEditorTabProps> = ({ 
               updateVanshavalField('applicant', val);
               onChange({ applicantName: val });
             }}
-            placeholder="उदा. प्रशांत रामदास भोये (अर्जदार)"
+            placeholder="उदा. अर्जदाराचे नाव"
             className="w-full px-3 py-2 border border-slate-300 rounded-md bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500 text-slate-900 font-bold"
           />
         </div>
@@ -174,7 +174,7 @@ export const VanshavalTreeEditorTab: React.FC<VanshavalTreeEditorTabProps> = ({ 
             value={newUncle}
             onChange={(e) => setNewUncle(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddUncle())}
-            placeholder="उदा. सोमनाथ यशवंत भोये (काका)"
+            placeholder="उदा. काकांचे नाव"
             className="flex-1 px-3 py-1.5 border border-slate-300 rounded-md bg-white text-slate-900 text-xs"
           />
           <button
@@ -221,7 +221,7 @@ export const VanshavalTreeEditorTab: React.FC<VanshavalTreeEditorTabProps> = ({ 
             value={newSibling}
             onChange={(e) => setNewSibling(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddSibling())}
-            placeholder="उदा. किरण रामदास भोये (भाऊ)"
+            placeholder="उदा. भावाचे / बहिणीचे नाव"
             className="flex-1 px-3 py-1.5 border border-slate-300 rounded-md bg-white text-slate-900 text-xs"
           />
           <button
@@ -268,7 +268,7 @@ export const VanshavalTreeEditorTab: React.FC<VanshavalTreeEditorTabProps> = ({ 
             value={newCousin}
             onChange={(e) => setNewCousin(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddCousin())}
-            placeholder="उदा. अमोल सोमनाथ भोये (चुलत भाऊ)"
+            placeholder="उदा. चुलत भावाचे / बहिणीचे नाव"
             className="flex-1 px-3 py-1.5 border border-slate-300 rounded-md bg-white text-slate-900 text-xs"
           />
           <button

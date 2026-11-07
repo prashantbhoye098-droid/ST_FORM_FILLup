@@ -141,7 +141,7 @@ export const EducationEvidenceTab: React.FC<EducationEvidenceTabProps> = ({ data
             type="text"
             value={data.birthPlace}
             onChange={(e) => onChange({ birthPlace: e.target.value })}
-            placeholder="उदा. अंबासन, ता. बागलाण, जि. नाशिक"
+            placeholder="उदा. गाव, ता. ..., जि. ..."
             className="w-full px-3 py-2 border border-slate-300 rounded-md bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500 text-slate-900 font-medium"
           />
         </div>
@@ -161,7 +161,7 @@ export const EducationEvidenceTab: React.FC<EducationEvidenceTabProps> = ({ data
             type="text"
             value={data.primarySchoolName}
             onChange={(e) => onChange({ primarySchoolName: e.target.value })}
-            placeholder="उदा. जि. प. प्राथमिक शाळा, अंबासन"
+            placeholder="उदा. शाळेचे नाव"
             className="w-full px-3 py-2 border border-slate-300 rounded-md bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500 text-slate-900 font-medium"
           />
         </div>
@@ -174,7 +174,7 @@ export const EducationEvidenceTab: React.FC<EducationEvidenceTabProps> = ({ data
             type="text"
             value={data.primarySchoolVillageTalukaDist}
             onChange={(e) => onChange({ primarySchoolVillageTalukaDist: e.target.value })}
-            placeholder="उदा. अंबासन, ता. बागलाण, जि. नाशिक"
+            placeholder="उदा. गाव, ता. ..., जि. ..."
             className="w-full px-3 py-2 border border-slate-300 rounded-md bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500 text-slate-900"
           />
         </div>
@@ -187,7 +187,7 @@ export const EducationEvidenceTab: React.FC<EducationEvidenceTabProps> = ({ data
             type="text"
             value={data.secondarySchoolName}
             onChange={(e) => onChange({ secondarySchoolName: e.target.value })}
-            placeholder="उदा. जनता माध्यमिक व उच्च माध्यमिक विद्यालय, अंबासन"
+            placeholder="उदा. माध्यमिक शाळा / महाविद्यालयाचे नाव"
             className="w-full px-3 py-2 border border-slate-300 rounded-md bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500 text-slate-900 font-medium"
           />
         </div>
@@ -200,7 +200,7 @@ export const EducationEvidenceTab: React.FC<EducationEvidenceTabProps> = ({ data
             type="text"
             value={data.secondarySchoolVillageTalukaDist}
             onChange={(e) => onChange({ secondarySchoolVillageTalukaDist: e.target.value })}
-            placeholder="उदा. अंबासन, ता. बागलाण, जि. नाशिक"
+            placeholder="उदा. गाव, ता. ..., जि. ..."
             className="w-full px-3 py-2 border border-slate-300 rounded-md bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500 text-slate-900"
           />
         </div>

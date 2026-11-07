@@ -89,7 +89,7 @@ export const SavedProfilesModal: React.FC<SavedProfilesModalProps> = ({
                 type="text"
                 value={newProfileName}
                 onChange={(e) => setNewProfileName(e.target.value)}
-                placeholder="उदा. मु. पो. अंबासन (ता. बागलाण)"
+                placeholder="उदा. गाव प्रोफाईल नाव (उदा. मु. पो. ...)"
                 className="flex-1 px-3 py-1.5 border border-slate-300 rounded-md bg-white text-slate-900 text-xs"
               />
               <button

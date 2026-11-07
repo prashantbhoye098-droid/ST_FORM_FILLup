@@ -61,7 +61,7 @@ export type SelfDeclarationType =
 // Saved Village Profile for instant auto-fill of future applicants
 export interface VillageProfile {
   id: string;
-  profileName: string; // e.g. "अंबासन गाव प्रोफाईल"
+  profileName: string; // e.g. "गाव प्रोफाईल नाव"
   village: string;
   taluka: string;
   district: string;
